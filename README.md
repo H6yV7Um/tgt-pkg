@@ -1,9 +1,11 @@
 # tgt-pkg
 网站质量测试通用
 
-## 用法：
+## 安装：
+$ npm install --save tgt-pkg
 
-### 检测
+## 用法：
+### 检测:
 
 
 
