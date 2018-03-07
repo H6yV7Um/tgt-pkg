@@ -1,0 +1,27 @@
+{
+  "name": "tgt-pkg",
+  "version": "1.1.7",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "allan_guys@qq.com",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "fs-extra": "^5.0.0",
+    "iconv-lite": "^0.4.19",
+    "imagemin": "^5.3.1",
+    "imagemin-gifsicle": "^5.2.0",
+    "imagemin-jpeg-recompress": "^5.1.0",
+    "imagemin-jpegtran": "^5.0.2",
+    "imagemin-mozjpeg": "^7.0.0",
+    "imagemin-pngquant": "^5.0.1",
+    "imagemin-svgo": "^6.0.0",
+    "imagemin-webp": "^4.1.0",
+    "make-dir": "^1.1.0",
+    "q": "^1.5.1",
+    "request": "^2.83.0"
+  }
+}
