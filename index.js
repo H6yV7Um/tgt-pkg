@@ -84,7 +84,7 @@ const initCheck = [
 
 
 //检查结果
-const checkResult = {
+var checkResult = {
     'list':[
         // {
         // "error_id": 1002,
@@ -191,7 +191,7 @@ global.checkPing = function(con) {
         }
     }
     function f(data,url) {
-            if(data.indexOf('ping_tcss') != -1|data.indexOf('ping') != -1){
+            if(data.indexOf('ping_tcss') != -1 || data.indexOf('ping') != -1){
                 var u = !url ? '' : ',URL为：'+url  ;
                 rt['pass_info'] = "页面统计代码已添加"+ u;
                 flag = true;
@@ -486,8 +486,7 @@ function check(arg,callback){
                             checkImage().then((size)=>{
                                 checkResult.list.push(imageResult(size));
                                 resolve(page);
-                            })
-                        }
+                         }
                     });
                 }).catch(e=>{
                 console.log(e.message)

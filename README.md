@@ -9,9 +9,6 @@ $ npm install --save tgt-pkg
 
 
 
-
-
-
     tgtest.check({
 
         'config':{
@@ -19,19 +16,21 @@ $ npm install --save tgt-pkg
             'isbnAPI':{'host':'x.x.x.x','url':'http://x.x.x.x/isbn_api.php?url='}//host:api host,url:API地址
         },
         'file':{
-            'name':filename + '.html',//需要检查的html文件
+            'name':filename//需要检查的html文件
         },
-        //请求检查，真实的http请求,传入phantomjs生成的json文件地址
-        //默认检查: 图片大小 picSize:true
-        //todo:
-        // 1、点击流 ping:true
         'request':{
-            'name':filename + '.json'//需要检查的json文件
+            'name':filename//需要检查的json文件
         }
     },
     function(cb){
-        console.log(cb)
-        dbQuery(cb.checkResult)
+        //cb.checkResult:
+        //{
+        //list:[{
+        // "error_id": 1002,
+        // "error_info": "无法检测到页面编码",
+        // "pass_info": "页面编码正常"
+        // }]
+        //}
     })
 
 
