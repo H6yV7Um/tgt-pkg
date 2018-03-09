@@ -84,7 +84,7 @@ const initCheck = [
 
 
 //检查结果
-var checkResult = {
+const checkResult = {
     'list':[
         // {
         // "error_id": 1002,
@@ -127,9 +127,11 @@ global.checkKeywords  = function (page) {
     var con = metaKeywords.attr("content");
     var rt = {};
     if (metaKeywords.length > 0 && con.length > 0) {
-            rt['pass_info'] = "页面关键字符合规范";
-    } else {
+            rt['pass_info'] = "";
+    } else if(metaKeywords.length == 0) {
             rt['error_info'] =  'keywords标签不存在';
+    }else{
+        rt['error_info'] =  'keywords没有填写';
     };
     return rt;
 };
@@ -191,7 +193,7 @@ global.checkPing = function(con) {
         }
     }
     function f(data,url) {
-            if(data.indexOf('ping_tcss') != -1 || data.indexOf('ping') != -1){
+            if(data.indexOf('ping_tcss') != -1||data.indexOf('ping') != -1){
                 var u = !url ? '' : ',URL为：'+url  ;
                 rt['pass_info'] = "页面统计代码已添加"+ u;
                 flag = true;
@@ -486,7 +488,8 @@ function check(arg,callback){
                             checkImage().then((size)=>{
                                 checkResult.list.push(imageResult(size));
                                 resolve(page);
-                         }
+                            })
+                        }
                     });
                 }).catch(e=>{
                 console.log(e.message)
