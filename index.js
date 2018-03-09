@@ -110,7 +110,7 @@ global.checkTitle = function (page) {
                     rt['pass_info'] = '';
                 }
             } else {
-                    rt['error_info'] = '标题上必须含有“-腾讯游戏”目前标题内容：'+titleText;
+                    rt['error_info'] = '标题上必须含有“-腾讯游戏”目前标题内容：“'+titleText+'”';
             }
         } else {
             rt['error_info'] = '页面title标签不存在';
@@ -409,7 +409,8 @@ global.$ = null;
 function readPage(arg) {
     return new Promise((resolve,reject) => {
             if(typeof arg.file.name != 'undefined' && typeof arg.file.name !== ''){
-                var p =  iconv.decode(fs.readFileSync(arg.file.name),'utf-8');
+                var c = typeof  arg.file.charset != 'undefined' ? arg.file.charset : 'utf-8'
+                var p =  iconv.decode(fs.readFileSync(arg.file.name),c);
                 global.$ = cheerio.load(p);
                 resolve(p)
             }else{
@@ -472,30 +473,34 @@ function check(arg,callback){
                             checkResult.list.push(l)
                             resolve(page);
                         })
-
-                            //检查线上图片体积
-                            // checkOnlineImage(requestInfo.log.images).then(size => {
-                            //      checkResult.list.push(imageResult(size,true));
-                            //      var apiUrl = 'http://10.213.140.86/isbn_api.php?url='+requestInfo.log.pages[0].id;
-                            //     //检查isbn号
-                            //     checkISBN(apiUrl,page).then((l)=>{
-                            //         checkResult.list.push(l)
-                            //         resolve(page);
-                            //     })
-                            //     //return callback({'checkResult':checkResult});
-                            // })
+                                //检查线上图片体积
+                                // if(!!arg.file.checkPic){
+                                // checkOnlineImage(requestInfo.log.images).then(size => {
+                                //      checkResult.list.push(imageResult(size,true));
+                                //      var apiUrl = 'http://10.213.140.86/isbn_api.php?url='+requestInfo.log.pages[0].id;
+                                //     //检查isbn号
+                                //     checkISBN(apiUrl,page).then((l)=>{
+                                //         checkResult.list.push(l)
+                                //         resolve(page);
+                                //     })
+                                //     //return callback({'checkResult':checkResult});
+                                // })
+                                //}
                         }else{
-                            checkImage().then((size)=>{
-                                checkResult.list.push(imageResult(size));
+                            if(!!arg.file.checkPic){
+                                checkImage().then((size)=>{
+                                    checkResult.list.push(imageResult(size));
+                                    resolve(page);
+                                })
+                           }else{
                                 resolve(page);
-                            })
+                            }
                         }
                     });
                 }).catch(e=>{
                 console.log(e.message)
                 })
        }).then((page)=>{
-
            //回调
           callback({'checkResult':checkResult})
        }).catch(e=>{
