@@ -229,13 +229,15 @@ global.checkISBN = function(url,page) {
                 var getApi = JSON.parse(body)[0];
                 if(typeof  getApi != 'undefined' ){
                     var pointISBN = page.indexOf('ISBN');
-                    var ISBN = pointISBN <= 0 ? '' : page.substring(pointISBN,pointISBN+22).replace(/(^\s+)|(\s+$)/g, "");
+                    var ISBN = pointISBN <= 0 ? '' : page.substring(pointISBN,pointISBN+21).replace(/\s+/g,"");
+
                     var m = page.match(/新广出审(\S*)号/);
                     var Approvalno = !m ? '': '新广出审'+m[1]+'号';
                     console.log(ISBN)
+                    console.log(getApi.isbnno.replace(/(^\s+)|(\s+$)/g, ""))
                     //比对ISBN
                     if(ISBN != '' ){
-                        if(ISBN == getApi.isbnno.replace(/(^\s+)|(\s+$)/g, "")){
+                        if(ISBN == getApi.isbnno.replace(/\s+/g,"")){
                             rt['pass_info'] = "";
                         }else{
                             rt['error_info'] = "互联网游戏出版物ISBN号不正确"
