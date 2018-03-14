@@ -46,8 +46,21 @@ function extend(target, source) {
     }
     return target;
 }
+//字符大写、去除空格、去除特殊字符
+function fomatString(str) {
+    return filterStr(str.replace(/\s+/g,"").toUpperCase());
+}
 
-
+//去除特殊字符
+function filterStr(str) {
+    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？%+_]");
+    var specialStr = "";
+    for(var i=0;i<str.length;i++)
+    {
+        specialStr += str.substr(i, 1).replace(pattern, '');
+    }
+    return specialStr;
+}
 //检查项配置
 const initCheck = [
     {
@@ -213,6 +226,7 @@ global.checkISBN = function(url,page) {
     rt['error_id'] = 1002;
     rt['name'] = '版号';
     rt['pass_info'] = '';
+
     return new Promise((resolve,reject) => {
 
         const option = {
@@ -229,22 +243,23 @@ global.checkISBN = function(url,page) {
                 var getApi = JSON.parse(body)[0];
                 if(typeof  getApi != 'undefined' ){
                     var pointISBN = page.indexOf('ISBN');
-                    var ISBN = pointISBN <= 0 ? '' : page.substring(pointISBN,pointISBN+21).replace(/\s+/g,"");
-
+                    var ISBN = pointISBN <= 0 ? '' :fomatString(page.substring(pointISBN,pointISBN+22));
                     var m = page.match(/新广出审(\S*)号/);
-                    var Approvalno = !m ? '': '新广出审'+m[1]+'号';
+                    var Approvalno = !m ? '': fomatString('新广出审'+m[1]+'号');
                     console.log(ISBN)
-                    console.log(getApi.isbnno.replace(/(^\s+)|(\s+$)/g, ""))
+                    console.log(getApi.isbnno.replace(/\s+/g,"").toUpperCase())
+                    console.log(Approvalno)
+                    console.log(fomatString(getApi.approvalno))
                     //比对ISBN
                     if(ISBN != '' ){
-                        if(ISBN == getApi.isbnno.replace(/\s+/g,"")){
+                        if(ISBN == fomatString(getApi.isbnno)){
                             rt['pass_info'] = "";
                         }else{
                             rt['error_info'] = "互联网游戏出版物ISBN号不正确"
                         }
                     }
                     if(Approvalno != '' ){
-                        if(Approvalno == getApi.approvalno){
+                        if(Approvalno == fomatString(getApi.approvalno)){
                             rt['pass_info'] = "";
                         }else{
                             rt['error_info'] = "新广出审批号出错"
