@@ -246,10 +246,6 @@ global.checkISBN = function(url,page) {
                     var ISBN = pointISBN <= 0 ? '' :fomatString(page.substring(pointISBN,pointISBN+22));
                     var m = page.match(/新广出审(\S*)号/);
                     var Approvalno = !m ? '': fomatString('新广出审'+m[1]+'号');
-                    console.log(ISBN)
-                    console.log(getApi.isbnno.replace(/\s+/g,"").toUpperCase())
-                    console.log(Approvalno)
-                    console.log(fomatString(getApi.approvalno))
                     //比对ISBN
                     if(ISBN != '' ){
                         if(ISBN == fomatString(getApi.isbnno)){
