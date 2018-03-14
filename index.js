@@ -196,6 +196,7 @@ global.checkPing = function(con) {
             if(data.indexOf('ping_tcss') != -1||data.indexOf('ping') != -1){
                 var u = !url ? '' : ',URL为：'+url  ;
                 rt['pass_info'] = "页面统计代码已添加"+ u;
+                rt['error_info'] = "";
                 flag = true;
             }
     }
@@ -228,9 +229,10 @@ global.checkISBN = function(url,page) {
                 var getApi = JSON.parse(body)[0];
                 if(typeof  getApi != 'undefined' ){
                     var pointISBN = page.indexOf('ISBN');
-                    var ISBN = pointISBN <= 0 ? '' : page.substring(pointISBN,pointISBN+23).replace(/(^\s+)|(\s+$)/g, "");
+                    var ISBN = pointISBN <= 0 ? '' : page.substring(pointISBN,pointISBN+22).replace(/(^\s+)|(\s+$)/g, "");
                     var m = page.match(/新广出审(\S*)号/);
                     var Approvalno = !m ? '': '新广出审'+m[1]+'号';
+                    console.log(ISBN)
                     //比对ISBN
                     if(ISBN != '' ){
                         if(ISBN == getApi.isbnno.replace(/(^\s+)|(\s+$)/g, "")){
@@ -462,11 +464,11 @@ function check(arg,callback){
                             }
 
                             //从真实请求中检测点击流
-                            // for(var i =0;i<checkResult.list.length;i++){
-                            //     if(checkResult.list[i].error_id == 1001){
-                            //         checkResult.list[i] = extend(checkResult.list[i], checkPing(requestInfo.log.js))
-                            //     }
-                            // }
+                            for(var i =0;i<checkResult.list.length;i++){
+                                if(checkResult.list[i].error_id == 1001){
+                                    checkResult.list[i] = extend(checkResult.list[i], checkPing(requestInfo.log.ping,'json'))
+                                }
+                            }
                         //检查isbn号
                         var apiUrl = moduleConfig.isbnAPI.url + requestInfo.log.pages[0].id;
                         checkISBN(apiUrl,page).then((l)=>{
