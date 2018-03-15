@@ -426,7 +426,7 @@ function readPage(arg) {
             if(typeof arg.file.name != 'undefined' && typeof arg.file.name !== ''){
                 var c = typeof  arg.file.charset != 'undefined' ? arg.file.charset : 'utf-8'
                 var p =  iconv.decode(fs.readFileSync(arg.file.name),c);
-                global.$ = cheerio.load(p);
+                global.$ = cheerio.load(p,{});
                 resolve(p)
             }else{
                 reject({
@@ -436,12 +436,33 @@ function readPage(arg) {
             }
     })
 }
-
+//排除测试页面及include页面
+function standardPage(page) {
+    var level = 0;
+    var html = $('html').length;
+    var head = $('head').length;
+    var body = $('body').length;
+    if(html !=1){
+        level = level+1;
+    }
+    if(head !=1){
+        level = level+1;
+    }
+    if(body !=1){
+        level = level+1;
+    }
+    if(level == 0){
+        checkResult['pageStatus'] ='standard';
+    }else{
+        checkResult['pageStatus'] ='noStandard';
+    }
+}
 //check方法
 function check(arg,callback){
     localPicPath = path.resolve(arg.basePath+'ossweb-img/');
    readPage(arg)
        .then((page)=>{
+            standardPage(page);
             for(var i=0;i< initCheck.length;i++){
                 const data = initCheck[i];
                //配置为函数
