@@ -25,6 +25,7 @@ $ npm install --save tgt-pkg
     function(cb){
         //cb.checkResult:
         //{
+        //pageStandard:'ture/false'
         //list:[{
         // "error_id": 1002,
         // "error_info": "无法检测到页面编码",

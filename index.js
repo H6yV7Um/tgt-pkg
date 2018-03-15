@@ -439,22 +439,25 @@ function readPage(arg) {
 //排除测试页面及include页面
 function standardPage(page) {
     var level = 0;
-    var html = $('html').length;
-    var head = $('head').length;
-    var body = $('body').length;
-    if(html !=1){
+    var html = $('html');
+    var head = $('head');
+    var body = $('body');
+    console.log(html.length !=1 || html.html() == '')
+    console.log(head.html())
+    if(html.length !=1 || html.html() == ''){
         level = level+1;
     }
-    if(head !=1){
+    if(head.length !=1 || head.html() == ''){
         level = level+1;
     }
-    if(body !=1){
+    if(body.length !=1 || body.html() == ''){
         level = level+1;
     }
+    console.log($('head').length)
     if(level == 0){
-        checkResult['pageStatus'] ='standard';
+        checkResult['pageStandard'] ='true';
     }else{
-        checkResult['pageStatus'] ='noStandard';
+        checkResult['pageStandard'] ='false';
     }
 }
 //check方法
