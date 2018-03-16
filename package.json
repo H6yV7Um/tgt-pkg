@@ -1,6 +1,6 @@
 {
   "name": "tgt-pkg",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,6 +8,13 @@
   },
   "author": "allan_guys@qq.com",
   "license": "MIT",
+  "bugs":{
+    "url" : "https://github.com/allanguys/tgt-pkg/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/allanguys/tgt-pkg/"
+  },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "fs-extra": "^5.0.0",

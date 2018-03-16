@@ -171,7 +171,8 @@ global.checkDescription  = function (page) {
 }
 //检测编码
 global.checkCharset  = function (page) {
-    var metaCharset = /<meta charset=["']?([^<>"]+)["']?/gim;
+    var metaCharset = /<meta[^>]*?charset=(["'/>]?)([^"'\s/>]+)\1[^>]*?>/gim;
+
     var charset = null;
     var rt = {};
     if (page.match(metaCharset) != null) {
@@ -245,7 +246,7 @@ global.checkISBN = function(url,page) {
                     var pointISBN = page.indexOf('ISBN');
                     var ISBN = pointISBN <= 0 ? '' :fomatString(page.substring(pointISBN,pointISBN+22));
                     var m = page.match(/新广出审(\S*)号/);
-                    var Approvalno = !m ? '': fomatString('新广出审'+m[1]+'号');
+                    var Approvalno = !m ? '': fomatString(page.match(/新广出审(\S*)号/)[0]);
                     //比对ISBN
                     if(ISBN != '' ){
                         if(ISBN == fomatString(getApi.isbnno)){
@@ -261,7 +262,6 @@ global.checkISBN = function(url,page) {
                             rt['error_info'] = "新广出审批号出错"
                         }
                     }
-
                     resolve(rt);
                 }else{
                     resolve(rt);
@@ -373,7 +373,6 @@ function  checkOnlineImage(pic) {
                         imageminPngquant()
                     ]
                 }).then(outBuffer  => {
-                    console.log(data.length - outBuffer.length)
                 resolve(data.length - outBuffer.length );
             });
 
@@ -442,8 +441,7 @@ function standardPage(page) {
     var html = $('html');
     var head = $('head');
     var body = $('body');
-    console.log(html.length !=1 || html.html() == '')
-    console.log(head.html())
+
     if(html.length !=1 || html.html() == ''){
         level = level+1;
     }
@@ -453,7 +451,6 @@ function standardPage(page) {
     if(body.length !=1 || body.html() == ''){
         level = level+1;
     }
-    console.log($('head').length)
     if(level == 0){
         checkResult['pageStandard'] ='true';
     }else{
