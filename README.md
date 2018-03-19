@@ -12,14 +12,37 @@ $ npm install --save tgt-pkg
     tgtest.check({
 
         'config':{
-            'host':'x.x.x.x',//通用host
-            'isbnAPI':{'host':'x.x.x.x','url':'http://x.x.x.x/isbn_api.php?url='}//host:api host,url:API地址
+            /**
+             * 通用host
+             * @type    {String}
+             */
+            'host':'x.x.x.x',
+            'isbnAPI':{
+                /**
+                 * ISBN host地址
+                 * @type    {String}
+                 */
+                'host':'x.x.x.x',
+                /**
+                 * ISBN 地址
+                 * @type    {String}
+                 */
+                'url':'http://x.x.x.x/isbn_api.php?url='
+            }//host:api host,url:API地址
         },
         'file':{
+            /**
+             * 需要检查的html文件
+             * @type    {String}
+             */
             'name':filename//需要检查的html文件
         },
         'request':{
-            'name':filename//需要检查的json文件
+            /**
+             * 需要检查的json文件
+             * @type    {String}
+             */
+            'name':filename
         }
     },
     function(cb){
