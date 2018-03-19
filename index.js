@@ -175,19 +175,24 @@ global.checkCharset  = function (page) {
 
     var charset = null;
     var rt = {};
+
     if (page.match(metaCharset) != null) {
-        if (page.match(metaCharset).length > 0) {
-            charset = metaCharset.exec(page)[0].replace(/<|>|meta|=|name|keywords|charset|"|'|\s/gim, '');
-            var regC =  new RegExp("gbk|gb2312","ig");
-            if(regC.test(charset) ){
-                rt['pass_info'] = "";
-            }else{
-                rt['error_info'] = "页面编码最好为 gbk 或 gb2312 ";
-            }
-            rt['content'] = charset;
-        }
+        //
+        //    charset = metaCharset.exec(page)[0].replace(/<|>|meta|=|name|keywords|charset|"|'|\s/gim, '');
+        //    console.log(charset)
+        var regC =  new RegExp("gbk|gb2312|utf-8","ig");
+        //console.log(regC.test(charset))
+        //     if(regC.test(charset) ){
+        //         rt['pass_info'] = "";
+        //     }else{
+        //         rt['error_info'] = "页面编码最好为 gbk 或 gb2312 ";
+        //     }
+        //     rt['content'] = charset;
+        //
+        //
+        // rt['pass_info'] = "页面编码为"+charset;
     } else {
-            rt['error_info'] =  '页面没有声明编码';
+        rt['error_info'] =  '页面编码没有声明，可能会引起页面错乱';
     };
     return rt;
 };
