@@ -220,6 +220,7 @@ global.checkPing = function(con) {
             }
     }
     if(!flag){
+        rt['pass_info'] = '';
         rt['error_info'] = "未检测到上报统计请求，请查看是否已添加上报统计代码或实例化函数是否书写正常";
     }
 
@@ -430,7 +431,7 @@ function readPage(arg) {
             if(typeof arg.file.name != 'undefined' && typeof arg.file.name !== ''){
                 var c = typeof  arg.file.charset != 'undefined' ? arg.file.charset : 'utf-8'
                 var p =  iconv.decode(fs.readFileSync(arg.file.name),c);
-                global.$ = cheerio.load(p,{});
+                global.$ = cheerio.load(p,{useHtmlParser2:false});
                 resolve(p)
             }else{
                 reject({
@@ -442,24 +443,10 @@ function readPage(arg) {
 }
 //排除测试页面及include页面
 function standardPage(page) {
-    var level = 0;
-    var html = $('html');
-    var head = $('head');
-    var body = $('body');
-
-    if(html.length !=1 || html.html() == ''){
-        level = level+1;
-    }
-    if(head.length !=1 || head.html() == ''){
-        level = level+1;
-    }
-    if(body.length !=1 || body.html() == ''){
-        level = level+1;
-    }
-    if(level == 0){
-        checkResult['pageStandard'] ='true';
-    }else{
+    if($('head').text() == ''){
         checkResult['pageStandard'] ='false';
+    }else{
+        checkResult['pageStandard'] ='true';
     }
 }
 //check方法
@@ -501,7 +488,6 @@ function check(arg,callback){
                                     requestInfo.log.images.push('http://ossweb-img.qq.com/images/game/brand/game-logo.png')
                                 }
                             }
-
                             //从真实请求中检测点击流
                             for(var i =0;i<checkResult.list.length;i++){
                                 if(checkResult.list[i].error_id == 1001){
@@ -509,7 +495,7 @@ function check(arg,callback){
                                 }
                             }
                         //检查isbn号
-                        var apiUrl = moduleConfig.isbnAPI.url + requestInfo.log.pages[0].id;
+                        var apiUrl = moduleConfig.isbnAPI.url + requestInfo.log.pages[0].isbnlink;
                         checkISBN(apiUrl,page).then((l)=>{
                             checkResult.list.push(l)
                             resolve(page);
