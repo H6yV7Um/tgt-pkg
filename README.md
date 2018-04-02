@@ -49,6 +49,7 @@ $ npm install --save tgt-pkg
         //cb.checkResult:
         //{
         //pageStandard:'ture/false'
+        //ignore:'none' 
         //list:[{
         // "error_id": 1002,
         // "error_info": "无法检测到页面编码",

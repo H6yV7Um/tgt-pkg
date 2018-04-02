@@ -169,6 +169,17 @@ global.checkDescription  = function (page) {
     };
     return rt;
 }
+//检测排除项
+global.checkIgnore  = function (page) {
+    var metaIgnore = $("meta[name$='ignore']");
+    var con = metaIgnore.attr("content");
+    var rt = '';
+    if (metaIgnore.length > 0 && con.length >0) {
+        //checkResult.push({'ignore':'all'})
+        rt = con;
+    };
+    return rt;
+};
 //检测编码
 global.checkCharset  = function (page) {
     var metaCharset = /<meta[^>]*?charset=(["'/>]?)([^"'\s/>]+)\1[^>]*?>/gim;
@@ -449,6 +460,14 @@ function standardPage(page) {
         checkResult['pageStandard'] ='true';
     }
 }
+//排除测试页面及include页面
+function standardPage(page) {
+    if($('head').text() == ''){
+        checkResult['pageStandard'] ='false';
+    }else{
+        checkResult['pageStandard'] ='true';
+    }
+}
 //check方法
 function check(arg,callback){
     localPicPath = path.resolve(arg.basePath+'ossweb-img/');
@@ -528,8 +547,16 @@ function check(arg,callback){
                 console.log(e.message)
                 })
        }).then((page)=>{
-           //回调
-          callback({'checkResult':checkResult})
+          checkResult['ignore'] = 'none';
+          if(checkIgnore() == ''){
+                //回调
+                callback({'checkResult':checkResult})
+          }else{
+                checkResult['ignore'] = checkIgnore();
+                //回调
+                callback({'checkResult':checkResult});
+          }
+
        }).catch(e=>{
            console.log(e.message)
        })
