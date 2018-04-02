@@ -65,30 +65,35 @@ function filterStr(str) {
 const initCheck = [
     {
       'name':'页面标题',//检查项的名称
+      'enname':'title',//英文别名
       'rule':{'function':'checkTitle'},//检查函数
       'run':true,  //是否默认运行
       'error_id':2001//错误编码 http://tapd.oa.com/TGtest/markdown_wikis/#1020355671006485867
    },
     {
       'name':'关键字',//检查项的名称
+      'enname':'keywords',//英文别名
       'rule':{'function':'checkKeywords'},//检查函数
       'run':true,  //是否默认运行
       'error_id':2002//错误编码 http://tapd.oa.com/TGtest/markdown_wikis/#1020355671006485867
    },
     {
       'name':'描述',//检查项的名称
+      'enname':'description',//英文别名
       'rule':{'function':'checkDescription'},//检查函数
       'run':true,  //是否默认运行
       'error_id':2003//错误编码 http://tapd.oa.com/TGtest/markdown_wikis/#1020355671006485867
    },
     {
       'name':'编码',//检查项的名称
+      'enname':'charset',//英文别名
       'rule':{'function':'checkCharset'},//检查函数
       'run':true,  //是否默认运行
       'error_id':2004//错误编码 http://tapd.oa.com/TGtest/markdown_wikis/#1020355671006485867
    },
     {
       'name':'点击流',//检查项的名称
+      'enname':'ping',//英文别名
       'rule':{'function':'checkPing'},//检查函数
       'run':true,  //是否默认运行
       'error_id':1001//错误编码 http://tapd.oa.com/TGtest/markdown_wikis/#1020355671006485867
@@ -108,11 +113,12 @@ const checkResult = {
 };
 //检测标题
 global.checkTitle = function (page) {
+    if(checkIgnore().indexOf('title') >= 0) return 0;
     var title = $('title');
     var titleText = $('title').text();
     var rt = {};
     var checkRe = /\-\s?腾讯(?:游戏)/;
-    var viewport = $('meta[name=viewport]')
+    var viewport = $('meta[name=viewport]');
     //有viewport的移动端页面不检测标题规范
     if(viewport.length == 0){
         if (title.length > 0) {
@@ -136,6 +142,7 @@ global.checkTitle = function (page) {
 
 //检测关键词
 global.checkKeywords  = function (page) {
+    if(checkIgnore().indexOf('keywords') >= 0) return 0;
     var metaKeywords = $("meta[name$='eywords']");
     var con = metaKeywords.attr("content");
     var rt = {};
@@ -150,6 +157,7 @@ global.checkKeywords  = function (page) {
 };
 //检测描述
 global.checkDescription  = function (page) {
+    if(checkIgnore().indexOf('description') >= 0) return 0;
     var metaDescription = $("meta[name$='escription']");
     var con = metaDescription.attr("content");
     var rt = {};
@@ -171,19 +179,20 @@ global.checkDescription  = function (page) {
 }
 //检测排除项
 global.checkIgnore  = function (page) {
+
     var metaIgnore = $("meta[name$='ignore']");
     var con = metaIgnore.attr("content");
     var rt = '';
     if (metaIgnore.length > 0 && con.length >0) {
         //checkResult.push({'ignore':'all'})
-        rt = con;
+        rt = con.split(',');
     };
     return rt;
 };
 //检测编码
 global.checkCharset  = function (page) {
+    if(checkIgnore().indexOf('charset') >= 0) return 0;
     var metaCharset = /<meta[^>]*?charset=(["'/>]?)([^"'\s/>]+)\1[^>]*?>/gim;
-
     var charset = null;
     var rt = {};
 
@@ -209,7 +218,7 @@ global.checkCharset  = function (page) {
 };
 //点击流检测
 global.checkPing = function(con) {
-
+    if(checkIgnore().indexOf('ping') >= 0) return 0;
     var rt = {};
     var flag = false;
     if(typeof  con === 'string'){
@@ -240,13 +249,14 @@ global.checkPing = function(con) {
 //点击流检测
 global.checkISBN = function(url,page) {
     // if(page.indexOf('ISBN'))
+
     var rt = {};
     rt['error_id'] = 1002;
     rt['name'] = '版号';
     rt['pass_info'] = '';
 
     return new Promise((resolve,reject) => {
-
+        if(checkIgnore().indexOf('isbn') >= 0) resolve(0);
         const option = {
             host : moduleConfig.isbnAPI.host,
             port: 80,
@@ -473,6 +483,10 @@ function check(arg,callback){
     localPicPath = path.resolve(arg.basePath+'ossweb-img/');
    readPage(arg)
        .then((page)=>{
+
+    console.log('=============================');
+    console.log(checkIgnore().indexOf('isbn'));
+    console.log('=============================');
             standardPage(page);
             for(var i=0;i< initCheck.length;i++){
                 const data = initCheck[i];
@@ -480,9 +494,12 @@ function check(arg,callback){
                 if(typeof data.function !== undefined && typeof data.function !== '' &&  data.run){
                     var temp = {};
                     temp = global[data.rule.function](page);
-                    temp['error_id'] = data.error_id;
-                    temp['name'] = data.name;
-                    checkResult.list.push(temp);
+                    if(temp ){
+                        temp['error_id'] = data.error_id;
+                        temp['name'] = data.name;
+                        checkResult.list.push(temp);
+                    }
+
                 }
             }
             return page;
@@ -513,12 +530,14 @@ function check(arg,callback){
                                     checkResult.list[i] = extend(checkResult.list[i], checkPing(requestInfo.log.ping,'json'))
                                 }
                             }
-                        //检查isbn号
-                        var apiUrl = moduleConfig.isbnAPI.url + requestInfo.log.pages[0].isbnlink;
-                        checkISBN(apiUrl,page).then((l)=>{
-                            checkResult.list.push(l)
-                            resolve(page);
-                        })
+
+                            var apiUrl = moduleConfig.isbnAPI.url + requestInfo.log.pages[0].isbnlink;
+                            checkISBN(apiUrl,page).then((l)=>{
+                                if(l){
+                                    checkResult.list.push(l)
+                                }
+                                resolve(page);
+                            });
                                 //检查线上图片体积
                                 // if(!!arg.file.checkPic){
                                 // checkOnlineImage(requestInfo.log.images).then(size => {
@@ -548,11 +567,13 @@ function check(arg,callback){
                 })
        }).then((page)=>{
           checkResult['ignore'] = 'none';
-          if(checkIgnore() == ''){
+          if(checkIgnore()[0] == 'all'){
                 //回调
+                checkResult.list = {};
                 callback({'checkResult':checkResult})
           }else{
-                checkResult['ignore'] = checkIgnore();
+               var d =checkIgnore().toString() ;
+                checkResult['ignore'] = d == '' ? 'none' : d;
                 //回调
                 callback({'checkResult':checkResult});
           }
