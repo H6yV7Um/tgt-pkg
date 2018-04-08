@@ -5,6 +5,11 @@
 $ npm install --save tgt-pkg
 
 ## 用法：
+
+```javascript
+const tgtest = require('tgt-pkg');
+```
+
 ### 检测:
 
 ``` javascript
