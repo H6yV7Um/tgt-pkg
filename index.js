@@ -5,15 +5,14 @@ const path = require('path');
 const makeDir = require('make-dir');
 const iconv = require('iconv-lite');
 const http = require("http");
-const request = require('request').defaults({ encoding: null });
 const cheerio = require('cheerio');
-const imagemin = require('imagemin');
-const imageminJpegtran = require('imagemin-jpegtran');
-const imageminMozjpeg = require('imagemin-mozjpeg');
-const imageminPngquant = require('imagemin-pngquant');
-const imageminGifsicle = require('imagemin-gifsicle');
-const imageminSvgo = require('imagemin-svgo');
-const imageminWebp = require('imagemin-webp');
+// const imagemin = require('imagemin');
+// const imageminJpegtran = require('imagemin-jpegtran');
+// const imageminMozjpeg = require('imagemin-mozjpeg');
+// const imageminPngquant = require('imagemin-pngquant');
+// const imageminGifsicle = require('imagemin-gifsicle');
+// const imageminSvgo = require('imagemin-svgo');
+// const imageminWebp = require('imagemin-webp');
 
 
 /*参数*/
@@ -110,6 +109,65 @@ const checkResult = {
         // "pass_info": "页面编码正常"
         // }
         ]
+};
+//自定义
+global.userCustom = function (page,type,config) {
+    var keyB = 'custom_file_';
+    var temp = {};
+    config  = config.custom;
+    //文件中的自定义检查项
+    if(type == 'file'){
+        for(var i = 0;i< config.file.length;i++){
+            temp = {};
+            var f = config.file[i];
+            var name = f.name == ''  ?keyB+i : f.name;
+            if(f.type == 'tag'){
+                temp['error_id'] = keyB+i;
+                if($(f.rule).length == 0){
+                    temp['error_info'] = name +'不存在';
+                }else{
+                    temp['pass_info'] = '个度：'+$(f.rule).length;
+                }
+            }else if(f.type=='char'){
+                temp = charCheck(f.rule,name);
+            }
+            temp['name'] = name;
+            checkResult.list.push(JSON.parse(JSON.stringify(temp)));
+        }
+        function charCheck(c,name) {
+            var reg = new RegExp(c,'ig');
+            if(!reg.test(page)){
+                temp['error_info'] = name +'不存在';
+            }
+            temp['error_id'] = name;
+            return temp;
+        }
+    //请求中的自定义检查项
+    }else if(type == 'request'){
+
+        for(var i = 0;i< config.request.length;i++){
+            temp = {};
+            var f = config.request[i];
+            var has = false;
+            temp.name = f.name;
+            temp['error_id'] = 'custom_request_'+i;
+            if(f.type == 'source'){
+                page.log.entries.forEach(function (e) {
+                    if(e.request.url.indexOf(f.rule) >= 0 ){
+                        temp['pass_info'] = f.rule+'已添加';
+                        checkResult.list.push(JSON.parse(JSON.stringify(temp)));
+                        has = true
+                    }
+                });
+                if(!has){
+                    temp['error_info'] = f.rule+'未添加';
+                    checkResult.list.push(JSON.parse(JSON.stringify(temp)));
+                }
+
+            }
+
+        }
+    }
 };
 //检测标题
 global.checkTitle = function (page) {
@@ -453,7 +511,7 @@ function readPage(arg) {
                 var c = typeof  arg.file.charset != 'undefined' ? arg.file.charset : 'utf-8'
                 var p =  iconv.decode(fs.readFileSync(arg.file.name),c);
                 global.$ = cheerio.load(p,{useHtmlParser2:false});
-                resolve(p)
+                resolve(p);
             }else{
                 reject({
                     code:404,
@@ -483,10 +541,13 @@ function check(arg,callback){
     localPicPath = path.resolve(arg.basePath+'ossweb-img/');
    readPage(arg)
        .then((page)=>{
-
-    console.log('=============================');
-    console.log(checkIgnore().indexOf('isbn'));
-    console.log('=============================');
+            //用户自定义
+            if(typeof arg.custom.file == 'object' ){
+                if(arg.custom.file .length>0){
+                    userCustom(page,'file',arg);
+                }
+            }
+            //标准页面检测
             standardPage(page);
             for(var i=0;i< initCheck.length;i++){
                 const data = initCheck[i];
@@ -494,7 +555,7 @@ function check(arg,callback){
                 if(typeof data.function !== undefined && typeof data.function !== '' &&  data.run){
                     var temp = {};
                     temp = global[data.rule.function](page);
-                    if(temp ){
+                    if(temp){
                         temp['error_id'] = data.error_id;
                         temp['name'] = data.name;
                         checkResult.list.push(temp);
@@ -511,11 +572,18 @@ function check(arg,callback){
                     //配置代理和host
                     if(arg.config){moduleConfig = arg.config};
                     fs.access(arg.request.name,(err) => {
+
                         //是否配置name
                         if(!err && fs.readFileSync(arg.request.name).toString() != '' ){
                             requestArg = true;
                             requestInfo = JSON.parse(fs.readFileSync(arg.request.name).toString());
+                            //用户自定义
+                            if(typeof arg.custom.request == 'object' ){
 
+                                if(arg.custom.request.length>0){
+                                    userCustom(requestInfo,'request',arg);
+                                }
+                            }
                             checkResult['url'] =requestInfo.log.pages[0].id;
                             checkResult['admin'] =requestInfo.log.nameList;
                             if(requestInfo.log.images.length < 3){
@@ -542,7 +610,7 @@ function check(arg,callback){
                                 // if(!!arg.file.checkPic){
                                 // checkOnlineImage(requestInfo.log.images).then(size => {
                                 //      checkResult.list.push(imageResult(size,true));
-                                //      var apiUrl = 'http://10.213.140.86/isbn_api.php?url='+requestInfo.log.pages[0].id;
+                                //      var apiUrl = 'http://x.x.x.x/isbn_api.php?url='+requestInfo.log.pages[0].id;
                                 //     //检查isbn号
                                 //     checkISBN(apiUrl,page).then((l)=>{
                                 //         checkResult.list.push(l)
