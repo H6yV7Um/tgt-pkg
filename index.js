@@ -542,7 +542,7 @@ function check(arg,callback){
    readPage(arg)
        .then((page)=>{
             //用户自定义
-            if(typeof arg.custom.file == 'object' ){
+            if(typeof arg.custom == 'object' ){
                 if(arg.custom.file .length>0){
                     userCustom(page,'file',arg);
                 }
@@ -578,7 +578,7 @@ function check(arg,callback){
                             requestArg = true;
                             requestInfo = JSON.parse(fs.readFileSync(arg.request.name).toString());
                             //用户自定义
-                            if(typeof arg.custom.request == 'object' ){
+                            if(typeof arg.custom == 'object' ){
 
                                 if(arg.custom.request.length>0){
                                     userCustom(requestInfo,'request',arg);
