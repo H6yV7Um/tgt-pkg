@@ -10,29 +10,29 @@ $ npm install --save tgt-pkg
 ``` javascript
 tgtest.check({
 
-    'config':{
+    "config":{
         /**
          * 通用host
          * @type    {String}
          */
-        'host':'x.x.x.x',
-        'isbnAPI':{
+        "host":"x.x.x.x",
+        "isbnAPI":{
             /**
              * ISBN host地址
              * @type    {String}
              */
-            'host':'x.x.x.x',
+            "host":"x.x.x.x",
             /**
              * ISBN 地址
              * @type    {String}
              */
-            'url':'http://x.x.x.x/isbn_api.php?url='
+            "url":"http://x.x.x.x/isbn_api.php?url="
         }//host:api host,url:API地址
     },
     /**
      * 用户自定义检查配置
      */
-    'custom':{
+    "custom":{
         /**
          * 检查文件中的文本信息
          * @typedef {object}
@@ -40,9 +40,9 @@ tgtest.check({
          * @property {string} rule 需要检查的字符
          * @property {string} type 检查的类型  （char 字符，tag 标签/只需填写标签名）
          */
-        'file':[
-        {'name':'图片','rule':'123.jpg','type':'char'},
-        {'name':'div标签','rule':'div','type':'tag'}
+        "file":[
+        {"name":"图片","rule":"123.jpg","type":"char"},
+        {"name":"div标签","rule":"div","type":"tag"}
         ],
         /**
          * 检查请求中的文本信息
@@ -51,23 +51,23 @@ tgtest.check({
          * @property {string} rule 需要检查的字符
          * @property {string} type 检查的类型  （source 请求）
         */
-        'request':[
-        {'name':'王者统计代码','rule':'ossweb-img.qq.com/images/js/milo/milo-mi1n.js','type':'source'},
+        "request":[
+        {"name":"王者统计代码","rule":"ossweb-img.qq.com/images/js/milo/milo-mi1n.js","type":"source"},
         ]
     },
-    'file':{
+    "file":{
         /**
          * 需要检查的html文件
          * @type    {String}
          */
-        'name':filename//需要检查的html文件
+        "name":filename//需要检查的html文件
     },
-    'request':{
+    "request":{
         /**
          * 需要检查的json文件
          * @type    {String}
          */
-        'name':filename
+        "name":filename
     }
 },
 function(cb){
@@ -82,19 +82,19 @@ function(cb){
 /**
  * 页面是否是标准页面 @type {Boolean}
  */
-pageStandard:'ture',
+pageStandard:"ture",
 /**
  * 页面是否是标准页面
  */
-ignore:'none',         
+ignore:"none",         
 /**
  * 页面地址
  */
-url:'http://game.qq.com',        
+url:"http://game.qq.com",        
 /**
  * 是否为开发接口拉取的数据   @type {Boolean}
  */
-openapi:'true',
+openapi:"true",
 /**
  * 错误列表
  * @typedef {object}
@@ -111,7 +111,7 @@ list:[
      "name":"编码"
  },         
  {
-     "error_id": 'custom_file_1',
+     "error_id": "custom_file_1",
      "error_info": "个度：122",
      "pass_info": "页面编码正常"
      "name": "div标签"
