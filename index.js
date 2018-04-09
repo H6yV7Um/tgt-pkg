@@ -100,18 +100,10 @@ const initCheck = [
 ]
 
 
-//检查结果
-const checkResult = {
-    'list':[
-        // {
-        // "error_id": 1002,
-        // "error_info": "无法检测到页面编码",
-        // "pass_info": "页面编码正常"
-        // }
-        ]
-};
+
+
 //自定义
-global.userCustom = function (page,type,config) {
+global.userCustom = function (page,type,config,checkResult) {
     var keyB = 'custom_file_';
     var temp = {};
     config  = config.custom;
@@ -505,13 +497,38 @@ function  imageResult(size,online) {
 global.$ = null;
 
 //读取页面内容
+// function readPage(arg) {
+//     return new Promise((resolve,reject) => {
+//             if(typeof arg.file.name != 'undefined' && typeof arg.file.name !== ''){
+//                 var c = typeof  arg.file.charset != 'undefined' ? arg.file.charset : 'utf-8'
+//                 var p =  iconv.decode(fs.readFileSync(arg.file.name),c);
+//                 console.log(arg.file.name)
+//                 global.$ = cheerio.load(p,{useHtmlParser2:false});
+//                 resolve(p);
+//             }else{
+//                 reject({
+//                     code:404,
+//                     message: '没有找到页面，请确认配置',
+//                 })
+//             }
+//     })
+// }
 function readPage(arg) {
     return new Promise((resolve,reject) => {
             if(typeof arg.file.name != 'undefined' && typeof arg.file.name !== ''){
                 var c = typeof  arg.file.charset != 'undefined' ? arg.file.charset : 'utf-8'
-                var p =  iconv.decode(fs.readFileSync(arg.file.name),c);
-                global.$ = cheerio.load(p,{useHtmlParser2:false});
-                resolve(p);
+
+
+                fs.readFile(arg.file.name,function (err, buffer) {
+                    var p =  iconv.decode(buffer,c);
+                    global.$ = cheerio.load(p,{useHtmlParser2:false});
+                    resolve(p);
+                });
+                // var p =  iconv.decode(fs.readFileSync(arg.file.name),c);
+                // console.log(arg.file.name)
+                // console.log(p.slice(100,200))
+                // global.$ = cheerio.load(p,{useHtmlParser2:false});
+                // resolve(p);
             }else{
                 reject({
                     code:404,
@@ -521,35 +538,41 @@ function readPage(arg) {
     })
 }
 //排除测试页面及include页面
-function standardPage(page) {
+function standardPage(page,checkResult) {
     if($('head').text() == ''){
         checkResult['pageStandard'] ='false';
     }else{
         checkResult['pageStandard'] ='true';
     }
 }
-//排除测试页面及include页面
-function standardPage(page) {
-    if($('head').text() == ''){
-        checkResult['pageStandard'] ='false';
-    }else{
-        checkResult['pageStandard'] ='true';
-    }
-}
+
 //check方法
 function check(arg,callback){
-    localPicPath = path.resolve(arg.basePath+'ossweb-img/');
+   localPicPath = path.resolve(arg.basePath+'ossweb-img/');
+    //检查结果
+    var checkResult = {
+        'list':[
+            // {
+            // "error_id": 1002,
+            // "error_info": "无法检测到页面编码",
+            // "pass_info": "页面编码正常"
+            // }
+        ]
+    };
    readPage(arg)
        .then((page)=>{
+
             //用户自定义
             if(typeof arg.custom == 'object' ){
                 if(arg.custom.file .length>0){
-                    userCustom(page,'file',arg);
+                    userCustom(page,'file',arg,checkResult);
                 }
             }
             //标准页面检测
-            standardPage(page);
+            standardPage(page,checkResult);
+
             for(var i=0;i< initCheck.length;i++){
+
                 const data = initCheck[i];
                //配置为函数
                 if(typeof data.function !== undefined && typeof data.function !== '' &&  data.run){
@@ -562,7 +585,8 @@ function check(arg,callback){
                     }
 
                 }
-            }
+            };
+            checkResult['url'] = arg.file.name;
             return page;
        }).then((page)=>{
 
@@ -581,7 +605,7 @@ function check(arg,callback){
                             if(typeof arg.custom == 'object' ){
 
                                 if(arg.custom.request.length>0){
-                                    userCustom(requestInfo,'request',arg);
+                                    userCustom(requestInfo,'request',arg,checkResult);
                                 }
                             }
                             checkResult['url'] =requestInfo.log.pages[0].id;
@@ -634,6 +658,8 @@ function check(arg,callback){
                 console.log(e.message)
                 })
        }).then((page)=>{
+           // console.log('000000000')
+           // console.log(checkResult)
           checkResult['ignore'] = 'none';
           if(checkIgnore()[0] == 'all'){
                 //回调

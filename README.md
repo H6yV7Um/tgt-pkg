@@ -65,7 +65,12 @@ tgtest.check({
          * 需要检查的html文件
          * @type    {String}
          */
-        "name":filename//需要检查的html文件
+        "name":filename,
+        /**
+         * html文件编码格式
+         * @type    {String} utf-8/gbk
+         */
+        "charset":"gbk"
     },
     "request":{
         /**
