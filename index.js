@@ -539,7 +539,7 @@ function readPage(arg) {
 }
 //排除测试页面及include页面
 function standardPage(page,checkResult) {
-    if($('head').text() == ''){
+    if($('head meta').length === 0){
         checkResult['pageStandard'] ='false';
     }else{
         checkResult['pageStandard'] ='true';
