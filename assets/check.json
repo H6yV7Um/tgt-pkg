@@ -1,0 +1,147 @@
+{
+  "log": {
+    "version": "1.2",
+    "creator": {
+      "name": "PhantomJS",
+      "version": "2.1.1"
+    },
+    "pages": [
+      {
+        "startedDateTime": "2017-11-30T09:37:40.480Z",
+        "id": "http://codol.qq.com/cp/a20171123clot/index.html",
+        "title": "《使命召唤Online》 X 陈冠希 & Kevin Poon 主理潮牌CLOT-使命召唤 Online-官方网站-腾讯游戏",
+        "pageTimings": {
+          "onLoad": -231
+        }
+      }
+    ],
+    "entries": [
+      {
+        "startedDateTime": "2017-11-30T09:37:43.077Z",
+        "time": 62,
+        "request": {
+          "method": "GET",
+          "url": "http://ossweb-img.qq.com/images/clientpop/js/history/gpmhistory.js",
+          "httpVersion": "HTTP/1.1",
+          "cookies": [],
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://codol.qq.com/cp/a20171123clot/index.html"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Unknown; Linux x86_64) AppleWebKit/538.1 (KHTML, like Gecko) PhantomJS/2.1.1 Safari/538.1"
+            }
+          ],
+          "queryString": [],
+          "headersSize": -1,
+          "bodySize": -1
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "HTTP/1.1",
+          "cookies": [],
+          "headers": [
+            {
+              "name": "Date",
+              "value": "Thu, 30 Nov 2017 09:37:43 GMT"
+            },
+            {
+              "name": "Server",
+              "value": "Apache"
+            },
+            {
+              "name": "Last-Modified",
+              "value": "Mon, 29 Aug 2016 08:54:19 GMT"
+            },
+            {
+              "name": "ETag",
+              "value": "\"3c02058-500c-27244c0\""
+            },
+            {
+              "name": "Accept-Ranges",
+              "value": "bytes"
+            },
+            {
+              "name": "Content-Length",
+              "value": "20492"
+            },
+            {
+              "name": "Access-Control-Allow-Methods",
+              "value": "GET,POST"
+            },
+            {
+              "name": "Access-Control-Allow-Headers",
+              "value": "Content-Type"
+            },
+            {
+              "name": "Access-Control-Allow-Credentials",
+              "value": "true"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=15"
+            },
+            {
+              "name": "Connection",
+              "value": "Keep-Alive"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/x-javascript"
+            }
+          ],
+          "redirectURL": "",
+          "headersSize": -1,
+          "bodySize": 11083,
+          "content": {
+            "size": 11083,
+            "mimeType": "application/x-javascript"
+          }
+        },
+        "cache": {},
+        "timings": {
+          "blocked": 0,
+          "dns": -1,
+          "connect": -1,
+          "send": 0,
+          "wait": 32,
+          "receive": 30,
+          "ssl": -1
+        },
+        "pageref": "http://codol.qq.com/cp/a20171123clot/index.html"
+      }
+    ],
+    "headCon": {
+      "title": {
+        "con": "《使命召唤Online》 X 陈冠希 &amp; Kevin Poon 主理潮牌CLOT-使命召唤 Online-官方网站-腾讯游戏",
+        "detail": "<title>《使命召唤Online》 X 陈冠希 &amp; Kevin Poon 主理潮牌CLOT-使命召唤 Online-官方网站-腾讯游戏</title>"
+      },
+      "charset": {
+        "con": "gbk",
+        "detail": "<meta charset=\"gbk\">"
+      },
+      "description": {
+        "con": "《使命召唤Online》是由动视暴雪研发，腾讯游戏独家代理，以久负盛名的《Call of Duty》系列为题材，集合了《Call of Duty》全系列最受欢迎的元素制作的第一人称视角射击游戏网游。",
+        "detail": "<meta name=\"description\" content=\"《使命召唤Online》是由动视暴雪研发，腾讯游戏独家代理，以久负盛名的《Call of Duty》系列为题材，集合了《Call of Duty》全系列最受欢迎的元素制作的第一人称视角射击游戏网游。\">"
+      },
+      "keywords": {
+        "con": "黑色行动，再现光明，CODOL，COD，使命召唤，使命召唤Online，使命召唤OL，现代战争，现代战争OL，FPS，FPS网游，射击游戏，Call of Duty，Call of Duty Online，Call of Duty Online现代战争，黑色行动，普莱斯，幽灵，肥皂，ghost，CODOL视频，CODOL官网，CODOL游戏下载",
+        "detail": "<meta name=\"keywords\" content=\"黑色行动，再现光明，CODOL，COD，使命召唤，使命召唤Online，使命召唤OL，现代战争，现代战争OL，FPS，FPS网游，射击游戏，Call of Duty，Call of Duty Online，Call of Duty Online现代战争，黑色行动，普莱斯，幽灵，肥皂，ghost，CODOL视频，CODOL官网，CODOL游戏下载\">"
+      }
+    },
+    "images": [
+      "http://game.gtimg.cn/images/codo/cp/a20171123clot/bg1.jpg"
+    ],
+    "js": [
+      "http://ossweb-img.qq.com/images/js/title.js"
+    ],
+    "nameList": "kaireewu;shineliang;v_daweixu"
+  }
+}
