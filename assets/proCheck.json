@@ -17,7 +17,7 @@
     "content-encoding": "gzip",
     "connection": "keep-alive"
   },
-  "html": "...",
+  "html": "页面string",
   "redirects": ["url1", "url2", "url3"],
   "requests": {
     "http://somedomain/path/file.ext": 200,
