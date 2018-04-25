@@ -105,7 +105,7 @@ const initCheck = [
 
 
 //自定义
-global.userCustom = function (page,type,config,checkResult) {
+global.userCustom = function (page,type,config,checkResult,v) {
     var keyB = 'custom_file_';
     var temp = {};
     config  = config.custom;
@@ -120,7 +120,7 @@ global.userCustom = function (page,type,config,checkResult) {
                 if($(f.rule).length == 0){
                     temp['error_info'] = name +'不存在';
                 }else{
-                    temp['pass_info'] = '个度：'+$(f.rule).length;
+                    temp['pass_info'] = 'length：'+$(f.rule).length;
                 }
             }else if(f.type=='char'){
                 temp = charCheck(f.rule,name);
@@ -129,9 +129,13 @@ global.userCustom = function (page,type,config,checkResult) {
             checkResult.list.push(JSON.parse(JSON.stringify(temp)));
         }
         function charCheck(c,name) {
-            var reg = new RegExp(c,'ig');
+            var m = !f.mode ? 'ig':f.mode;
+            var reg = new RegExp(c,m);
+            var re = page.match(reg);
             if(!reg.test(page)){
                 temp['error_info'] = name +'不存在';
+            }else{
+                temp['pass_info'] = re.toString()
             }
             temp['error_id'] = name;
             return temp;
@@ -146,13 +150,25 @@ global.userCustom = function (page,type,config,checkResult) {
             temp.name = f.name;
             temp['error_id'] = 'custom_request_'+i;
             if(f.type == 'source'){
-                page.log.entries.forEach(function (e) {
-                    if(e.request.url.indexOf(f.rule) >= 0 ){
-                        temp['pass_info'] = f.rule+'已添加';
-                        checkResult.list.push(JSON.parse(JSON.stringify(temp)));
-                        has = true
+                /**高版本检查*****************/
+                if(v == 'high'){
+                    for(let r in page){
+                        if(r.indexOf(f.rule) >= 0 ){
+                            temp['pass_info'] = f.rule+'已添加';
+                            checkResult.list.push(JSON.parse(JSON.stringify(temp)));
+                            has = true
+                        }
                     }
-                });
+                }else{
+                    page.log.entries.forEach(function (e) {
+                        if(e.request.url.indexOf(f.rule) >= 0 ){
+                            temp['pass_info'] = f.rule+'已添加';
+                            checkResult.list.push(JSON.parse(JSON.stringify(temp)));
+                            has = true
+                        }
+                    });
+                }
+
                 if(!has){
                     temp['error_info'] = f.rule+'未添加';
                     checkResult.list.push(JSON.parse(JSON.stringify(temp)));
@@ -230,8 +246,7 @@ global.checkDescription  = function (page) {
     return rt;
 }
 //检测排除项
-global.checkIgnore  = function (page) {
-
+global.checkIgnore  = function () {
     var metaIgnore = $("meta[name$='ignore']");
     var con = metaIgnore.attr("content");
     var rt = '';
@@ -249,20 +264,7 @@ global.checkCharset  = function (page) {
     var rt = {};
 
     if (page.match(metaCharset) != null) {
-        //
-        //    charset = metaCharset.exec(page)[0].replace(/<|>|meta|=|name|keywords|charset|"|'|\s/gim, '');
-        //    console.log(charset)
         var regC =  new RegExp("gbk|gb2312|utf-8","ig");
-        //console.log(regC.test(charset))
-        //     if(regC.test(charset) ){
-        //         rt['pass_info'] = "";
-        //     }else{
-        //         rt['error_info'] = "页面编码最好为 gbk 或 gb2312 ";
-        //     }
-        //     rt['content'] = charset;
-        //
-        //
-        // rt['pass_info'] = "页面编码为"+charset;
     } else {
         rt['error_info'] =  '页面编码没有声明，可能会引起页面错乱';
     };
@@ -273,6 +275,7 @@ global.checkPing = function(con) {
     if(checkIgnore().indexOf('ping') >= 0) return 0;
     var rt = {};
     var flag = false;
+    var rtText = '';
     if(typeof  con === 'string'){
         f(con);
     }else{
@@ -308,10 +311,6 @@ global.checkISBN = function(url,page) {
 
     return new Promise((resolve,reject) => {
         if(checkIgnore().indexOf('isbn') >= 0) resolve(0);
-        // const option = {
-        //     port: 80,
-        //     path: url
-        // };
         request(url,function (err,response,body) {
             if(err) reject(err);
             var getApi = JSON.parse(body)[0];
@@ -489,23 +488,6 @@ function  imageResult(size,online) {
 
 global.$ = null;
 
-//读取页面内容
-// function readPage(arg) {
-//     return new Promise((resolve,reject) => {
-//             if(typeof arg.file.name != 'undefined' && typeof arg.file.name !== ''){
-//                 var c = typeof  arg.file.charset != 'undefined' ? arg.file.charset : 'utf-8'
-//                 var p =  iconv.decode(fs.readFileSync(arg.file.name),c);
-//                 console.log(arg.file.name)
-//                 global.$ = cheerio.load(p,{useHtmlParser2:false});
-//                 resolve(p);
-//             }else{
-//                 reject({
-//                     code:404,
-//                     message: '没有找到页面，请确认配置',
-//                 })
-//             }
-//     })
-// }
 function readPage(arg) {
     return new Promise((resolve,reject) => {
             if(typeof arg.file.name != 'undefined' && typeof arg.file.name !== ''){
@@ -651,20 +633,15 @@ function check(arg,callback){
                 console.log(e.message)
                 })
        }).then((page)=>{
-           // console.log('000000000')
-           // console.log(checkResult)
           checkResult['ignore'] = 'none';
           if(checkIgnore()[0] == 'all'){
                 //回调
                 checkResult.list = {};
-                callback({'checkResult':checkResult})
           }else{
                var d =checkIgnore().toString() ;
                 checkResult['ignore'] = d == '' ? 'none' : d;
-                //回调
-                callback({'checkResult':checkResult});
           }
-
+          callback({'checkResult':checkResult});
        }).catch(e=>{
            console.log(e.message)
        })
@@ -686,12 +663,13 @@ function proCheck(arg,callback) {
     const __html  = __d.html;
     global.$ = cheerio.load(__html,{useHtmlParser2:false});
     const __requests  = __d.requests;
-    // let _data = arg.request.data;
-    // console.log(htmlString);
     //用户自定义
     if(typeof arg.custom == 'object' ){
         if(arg.custom.file .length>0){
             userCustom(__html,'file',arg,checkResult);
+        }
+        if(arg.custom.request.length>0){
+            userCustom(__d.requests,'request',arg,checkResult,'high');
         }
     }
     //标准页面检测
@@ -722,25 +700,29 @@ function proCheck(arg,callback) {
             if(l){
                 checkResult.list.push(l)
             }
-            //resolve(page);
         });
     };
-    console.log(checkResult)
-    // //字符模式
-    // if(typeof arg.request.data != 'undefined' && arg.request.data != ''){
-    //     //从真实请求中检测点击流
-    //     var tr = [];
-    //     for(let r in _data.requests){
-    //         console.log(r)
-    //         tr.push(r);
-    //     }
-    //     for(var i =0;i<checkResult.list.length;i++){
-    //         if(checkResult.list[i].error_id == 1001){
-    //             checkResult.list[i] = extend(checkResult.list[i], checkPing(tr,'json'))
-    //         }
-    //     }
-    // };
+    //从真实请求中检测点击流
+    var tr = [];
+    for(let r in __d.requests){
+        tr.push(r);
+    }
+    for(var i =0;i<checkResult.list.length;i++){
+        if(checkResult.list[i].error_id == 1001){
+            checkResult.list[i] = extend(checkResult.list[i], checkPing(tr,'json'))
+        }
+    }
+    //处理例外
+    var d =checkIgnore().toString() ;
+    checkResult['ignore'] = d == '' ? 'none' : d;
 
+    if(!callback){
+        return new Promise((resolve,reject) => {
+            resolve({'checkResult':checkResult})
+        })
+    }else{
+        callback({'checkResult':checkResult})
+    }
 }
 exports.check=check;
 exports.proCheck=proCheck;
