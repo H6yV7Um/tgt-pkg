@@ -6,6 +6,8 @@ const makeDir = require('make-dir');
 const iconv = require('iconv-lite');
 const http = require("http");
 const cheerio = require('cheerio');
+const request = require('request');
+
 // const imagemin = require('imagemin');
 // const imageminJpegtran = require('imagemin-jpegtran');
 // const imageminMozjpeg = require('imagemin-mozjpeg');
@@ -298,56 +300,47 @@ global.checkPing = function(con) {
 }
 //点击流检测
 global.checkISBN = function(url,page) {
-    // if(page.indexOf('ISBN'))
-
     var rt = {};
+    var host = moduleConfig.isbnAPI.host
     rt['error_id'] = 1002;
     rt['name'] = '版号';
     rt['pass_info'] = '';
 
     return new Promise((resolve,reject) => {
         if(checkIgnore().indexOf('isbn') >= 0) resolve(0);
-        const option = {
-            host : moduleConfig.isbnAPI.host,
-            port: 80,
-            path: url
-        }
-        const req =  http.get(option,(response) => {
-            var body = '';
-            response.on('data', function (d) {
-                body += d;
-            });
-            response.on('end', function () {
-                var getApi = JSON.parse(body)[0];
-                if(typeof  getApi != 'undefined' ){
-                    var pointISBN = page.indexOf('ISBN');
-                    var ISBN = pointISBN <= 0 ? '' :fomatString(page.substring(pointISBN,pointISBN+22));
-                    var m = page.match(/新广出审(\S*)号/);
-                    var Approvalno = !m ? '': fomatString(page.match(/新广出审(\S*)号/)[0]);
-                    //比对ISBN
-                    if(ISBN != '' ){
-                        if(ISBN == fomatString(getApi.isbnno)){
-                            rt['pass_info'] = "";
-                        }else{
-                            rt['error_info'] = "互联网游戏出版物ISBN号不正确"
-                        }
+        // const option = {
+        //     port: 80,
+        //     path: url
+        // };
+        request(url,function (err,response,body) {
+            if(err) reject(err);
+            var getApi = JSON.parse(body)[0];
+            if(typeof  getApi != 'undefined' ){
+                var pointISBN = page.indexOf('ISBN');
+                var ISBN = pointISBN <= 0 ? '' :fomatString(page.substring(pointISBN,pointISBN+22));
+                var m = page.match(/新广出审(\S*)号/);
+                var Approvalno = !m ? '': fomatString(page.match(/新广出审(\S*)号/)[0]);
+                //比对ISBN
+                if(ISBN != '' ){
+                    if(ISBN == fomatString(getApi.isbnno)){
+                        rt['pass_info'] = "";
+                    }else{
+                        rt['error_info'] = "互联网游戏出版物ISBN号不正确"
                     }
-                    if(Approvalno != '' ){
-                        if(Approvalno == fomatString(getApi.approvalno)){
-                            rt['pass_info'] = "";
-                        }else{
-                            rt['error_info'] = "新广出审批号出错"
-                        }
-                    }
-                    resolve(rt);
-                }else{
-                    resolve(rt);
                 }
-            });
-            response.on('error', function(e) {
-                reject(err);
-            });
-        })
+                if(Approvalno != '' ){
+                    if(Approvalno == fomatString(getApi.approvalno)){
+                        rt['pass_info'] = "";
+                    }else{
+                        rt['error_info'] = "新广出审批号出错"
+                    }
+                }
+                resolve(rt);
+            }else{
+                resolve(rt);
+            }
+
+        });
 
     });
 };
@@ -539,7 +532,7 @@ function readPage(arg) {
 }
 //排除测试页面及include页面
 function standardPage(page,checkResult) {
-    if($('head meta').length === 0){
+    if($('head meta').length === 0 || $('body').text() == ''){
         checkResult['pageStandard'] ='false';
     }else{
         checkResult['pageStandard'] ='true';
@@ -676,4 +669,78 @@ function check(arg,callback){
            console.log(e.message)
        })
 }
+//procheck
+function proCheck(arg,callback) {
+    //检查结果
+    var checkResult = {
+        'list':[
+            // {
+            // "error_id": 1002,
+            // "error_info": "无法检测到页面编码",
+            // "pass_info": "页面编码正常"
+            // }
+        ]
+    };
+
+    const __d = arg.json;
+    const __html  = __d.html;
+    global.$ = cheerio.load(__html,{useHtmlParser2:false});
+    const __requests  = __d.requests;
+    // let _data = arg.request.data;
+    // console.log(htmlString);
+    //用户自定义
+    if(typeof arg.custom == 'object' ){
+        if(arg.custom.file .length>0){
+            userCustom(__html,'file',arg,checkResult);
+        }
+    }
+    //标准页面检测
+    standardPage(__html,checkResult);
+
+    for(var i=0;i< initCheck.length;i++){
+
+        const data = initCheck[i];
+        //配置为函数
+        if(typeof data.function !== undefined && typeof data.function !== '' &&  data.run){
+            var temp = {};
+            temp = global[data.rule.function](__html);
+            if(temp){
+                temp['error_id'] = data.error_id;
+                temp['name'] = data.name;
+                checkResult.list.push(temp);
+            }
+
+        }
+    };
+    const pageUrl = __d.url
+    checkResult['url'] = pageUrl;
+    //判断用户是否配置
+    if(arg.config){
+        moduleConfig = arg.config;
+        var apiUrl = arg.config.isbnAPI.url + pageUrl;
+        checkISBN(apiUrl,__html).then((l)=>{
+            if(l){
+                checkResult.list.push(l)
+            }
+            //resolve(page);
+        });
+    };
+    console.log(checkResult)
+    // //字符模式
+    // if(typeof arg.request.data != 'undefined' && arg.request.data != ''){
+    //     //从真实请求中检测点击流
+    //     var tr = [];
+    //     for(let r in _data.requests){
+    //         console.log(r)
+    //         tr.push(r);
+    //     }
+    //     for(var i =0;i<checkResult.list.length;i++){
+    //         if(checkResult.list[i].error_id == 1001){
+    //             checkResult.list[i] = extend(checkResult.list[i], checkPing(tr,'json'))
+    //         }
+    //     }
+    // };
+
+}
 exports.check=check;
+exports.proCheck=proCheck;
