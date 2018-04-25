@@ -1,5 +1,5 @@
 # tgt-pkg
-网站质量测试通用
+IEG网站质量测试通用模块
 
 ## 安装：
 $ npm install --save tgt-pkg
@@ -11,7 +11,7 @@ const tgtest = require('tgt-pkg');
 ```
 
 ### 检测:
-#### proCheck方法，检查集成html和请求的json请求，格式： [proCheck.json](https://github.com/allanguys/tgt-pkg/blob/master/assets/proCheck.json)
+#### proCheck方法，检查集成html和请求的json数据流，格式： [proCheck.json](https://github.com/allanguys/tgt-pkg/blob/master/assets/proCheck.json)
 
 ``` javascript
 tgtest.proCheck(
@@ -60,7 +60,7 @@ tgtest.proCheck(
 
 ```
 >proCheck方法兼容callback和Promise
-#### check方法，检查file文件及请求文件，请求文件格式： [proCheck.json](https://github.com/allanguys/tgt-pkg/blob/master/assets/check.json)
+#### check方法，检查file文件及请求文件，请求文件格式： [check.json](https://github.com/allanguys/tgt-pkg/blob/master/assets/check.json)
 
 ``` javascript
 tgtest.check({
