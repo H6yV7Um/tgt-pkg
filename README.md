@@ -15,47 +15,47 @@ const tgtest = require('tgt-pkg');
 
 ``` javascript
 tgtest.proCheck(
-    {
-        "config":{
-            "isbnAPI":{
-                /**
-                 * ISBN 地址
-                 * @type    {String}
-                 */
-                "url":"http://x.x.x.x/isbn_api.php?url="
-            }
-        },
-        "custom":{
+{
+    "config":{
+        "isbnAPI":{
             /**
-             * 检查文件中的文本信息
-             * @typedef {object}
-             * @property {string} name 检查项的名称
-             * @property {string} rule 需要检查的字符,如type为char时支持正则传参，如mode不存在则默认为ig模式匹配
-             * @property {string} type 检查的类型  （char 字符，tag 标签/只需填写标签名）
+             * ISBN 地址
+             * @type    {String}
              */
-            "file":[
-                {"name":"图片","rule":"123.jpg","type":"char"},
-                {"name":"图片","rule":"tencent","mode":"g","type":"char"},
-                {"name":"div标签","rule":"div","type":"tag"}
-            ],
-            /**
-             * 检查请求中的文本信息
-             * @typedef {object}
-             * @property {string} name 检查项的名称
-             * @property {string} rule 需要检查的字符
-             * @property {string} type 检查的类型  （source 请求）
-             */
-            "request":[
-                {"name":"王者统计代码","rule":"somedomain/path/file.ext","type":"source"},
-            ]
-        },
+            "url":"http://x.x.x.x/isbn_api.php?url="
+        }
+    },
+    "custom":{
         /**
-         * 需要检查的json数据流
-         * @property {object}  //格式https://github.com/allanguys/tgt-pkg/blob/master/assets/proCheck.json
+         * 检查文件中的文本信息
+         * @typedef {object}
+         * @property {string} name 检查项的名称
+         * @property {string} rule 需要检查的字符,如type为char时支持正则传参，如mode不存在则默认为ig模式匹配
+         * @property {string} type 检查的类型  （char 字符，tag 标签/只需填写标签名）
          */
-        'json':requestJson
-    }).then((result)=>{
-        console.log(result.checkResult)
+        "file":[
+            {"name":"图片","rule":"123.jpg","type":"char"},
+            {"name":"图片","rule":"tencent","mode":"g","type":"char"},
+            {"name":"div标签","rule":"div","type":"tag"}
+        ],
+        /**
+         * 检查请求中的文本信息
+         * @typedef {object}
+         * @property {string} name 检查项的名称
+         * @property {string} rule 需要检查的字符
+         * @property {string} type 检查的类型  （source 请求）
+         */
+        "request":[
+            {"name":"王者统计代码","rule":"somedomain/path/file.ext","type":"source"},
+        ]
+    },
+    /**
+     * 需要检查的json数据流
+     * @property {object}  //格式https://github.com/allanguys/tgt-pkg/blob/master/assets/proCheck.json
+     */
+    'json':requestJson
+}).then((result)=>{
+    console.log(result.checkResult)
 })
 
 ```
