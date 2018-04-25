@@ -11,7 +11,57 @@ const tgtest = require('tgt-pkg');
 ```
 
 ### 检测:
-#### 检查file文件及请求文件
+#### proCheck方法，检查集成html和请求的json请求，格式： [proCheck.json](https://github.com/allanguys/tgt-pkg/blob/master/assets/proCheck.json)
+
+``` javascript
+tgtest.proCheck(
+    {
+        "config":{
+            "isbnAPI":{
+                /**
+                 * ISBN 地址
+                 * @type    {String}
+                 */
+                "url":"http://x.x.x.x/isbn_api.php?url="
+            }
+        },
+        "custom":{
+            /**
+             * 检查文件中的文本信息
+             * @typedef {object}
+             * @property {string} name 检查项的名称
+             * @property {string} rule 需要检查的字符,如type为char时支持正则传参，如mode不存在则默认为ig模式匹配
+             * @property {string} type 检查的类型  （char 字符，tag 标签/只需填写标签名）
+             */
+            "file":[
+                {"name":"图片","rule":"123.jpg","type":"char"},
+                {"name":"图片","rule":"tencent","mode":"g","type":"char"},
+                {"name":"div标签","rule":"div","type":"tag"}
+            ],
+            /**
+             * 检查请求中的文本信息
+             * @typedef {object}
+             * @property {string} name 检查项的名称
+             * @property {string} rule 需要检查的字符
+             * @property {string} type 检查的类型  （source 请求）
+             */
+            "request":[
+                {"name":"王者统计代码","rule":"somedomain/path/file.ext","type":"source"},
+            ]
+        },
+        /**
+         * 需要检查的json数据流
+         * @property {object}  //格式https://github.com/allanguys/tgt-pkg/blob/master/assets/proCheck.json
+         */
+        'json':requestJson
+    }).then((result)=>{
+        console.log(result.checkResult)
+})
+
+```
+>proCheck方法兼容callback和Promise
+#### check方法，检查file文件及请求文件，请求文件格式： [proCheck.json](https://github.com/allanguys/tgt-pkg/blob/master/assets/check.json)
+
 ``` javascript
 tgtest.check({
 
@@ -79,55 +129,7 @@ function(cb){
     //cb.checkResult
 })
 ```
-#### 检查集成html和请求的json请求，格式： [proCheck.json](https://github.com/allanguys/tgt-pkg/blob/master/assets/proCheck.json)
 
-``` javascript
-tgtest.proCheck(
-    {
-        "config":{
-            "isbnAPI":{
-                /**
-                 * ISBN 地址
-                 * @type    {String}
-                 */
-                "url":"http://x.x.x.x/isbn_api.php?url="
-            }
-        },
-        "custom":{
-            /**
-             * 检查文件中的文本信息
-             * @typedef {object}
-             * @property {string} name 检查项的名称
-             * @property {string} rule 需要检查的字符,如type为char时支持正则传参，如mode不存在则默认为ig模式匹配
-             * @property {string} type 检查的类型  （char 字符，tag 标签/只需填写标签名）
-             */
-            "file":[
-                {"name":"图片","rule":"123.jpg","type":"char"},
-                {"name":"图片","rule":"tencent","mode":"g","type":"char"},
-                {"name":"div标签","rule":"div","type":"tag"}
-            ],
-            /**
-             * 检查请求中的文本信息
-             * @typedef {object}
-             * @property {string} name 检查项的名称
-             * @property {string} rule 需要检查的字符
-             * @property {string} type 检查的类型  （source 请求）
-             */
-            "request":[
-                {"name":"王者统计代码","rule":"somedomain/path/file.ext","type":"source"},
-            ]
-        },
-        /**
-         * 需要检查的json数据流
-         * @property {object}  //格式https://github.com/allanguys/tgt-pkg/blob/master/assets/proCheck.json
-         */
-        'json':requestJson
-    }).then((result)=>{
-        console.log(result.checkResult)
-})
-
-```
->proCheck方法兼容callback和Promise
 
 ### 回调:
 ``` javascript
