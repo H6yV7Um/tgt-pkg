@@ -271,34 +271,53 @@ global.checkCharset  = function (page) {
     return rt;
 };
 //点击流检测
-global.checkPing = function(con) {
+let __htmlPing = false;
+let __requestPing = false;
+global.checkPing = function(con,source) {
     if(checkIgnore().indexOf('ping') >= 0) return 0;
     var rt = {};
     var flag = false;
-    var rtText = '';
     if(typeof  con === 'string'){
         f(con);
     }else{
         for (var i = 0; i <  con.length; i++) {
             var di  = con[i];
             if(!flag){
-                f(di,di);
+                f(di,di,source);
             }
         }
     }
-    function f(data,url) {
+    function f(data,url,source) {
+        var u = !url ? '' : ',URL为：'+url  ;
+        //检查html中的ping.js
+        if(source != 'request'){
             if(data.indexOf('ping_tcss') != -1||data.indexOf('ping') != -1){
-                var u = !url ? '' : ',URL为：'+url  ;
+
                 rt['pass_info'] = "页面统计代码已添加"+ u;
+                __htmlPing = true;
                 rt['error_info'] = "";
                 flag = true;
+            }else{
+                rt['error_info'] = "页面未添加统计代码";
             }
-    }
-    if(!flag){
-        rt['pass_info'] = '';
-        rt['error_info'] = "未检测到上报统计请求，请查看是否已添加上报统计代码或实例化函数是否书写正常";
-    }
+        }else{
+           //检查request中的真实上报
+            if(data.indexOf('com&url') != -1){
+                rt['pass_info'] = "页面统计已正常上报，上报请求："+ u;
+                __requestPing = true;
+                rt['error_info'] = "";
+                flag = true;
+            }else{
+                if(__htmlPing){
+                    rt['pass_info'] = "";
+                    rt['error_info'] = "已正确添加统计代码。但未检测到上报请求，请检查函数实例化是否正常";
+                }else{
+                    rt['error_info'] = "页面未添加统计代码";
+                }
+            }
+        }
 
+    };
     return rt;
 }
 //点击流检测
@@ -341,6 +360,8 @@ global.checkISBN = function(url,page) {
 
         });
 
+    }).catch((e)=>{
+        console.error(e);
     });
 };
 //本地图片ossweb-img目录检查
@@ -594,7 +615,7 @@ function check(arg,callback){
                             //从真实请求中检测点击流
                             for(var i =0;i<checkResult.list.length;i++){
                                 if(checkResult.list[i].error_id == 1001){
-                                    checkResult.list[i] = extend(checkResult.list[i], checkPing(requestInfo.log.ping,'json'))
+                                    checkResult.list[i] = extend(checkResult.list[i], checkPing(requestInfo.log.ping,'request'))
                                 }
                             }
 
@@ -661,6 +682,7 @@ function proCheck(arg,callback) {
 
     const __d = arg.json;
     const __html  = __d.html;
+    const pageUrl = __d.url
     global.$ = cheerio.load(__html,{useHtmlParser2:false});
     const __requests  = __d.requests;
     //用户自定义
@@ -690,18 +712,9 @@ function proCheck(arg,callback) {
 
         }
     };
-    const pageUrl = __d.url
     checkResult['url'] = pageUrl;
-    //判断用户是否配置
-    if(arg.config){
-        moduleConfig = arg.config;
-        var apiUrl = arg.config.isbnAPI.url + pageUrl;
-        checkISBN(apiUrl,__html).then((l)=>{
-            if(l){
-                checkResult.list.push(l)
-            }
-        });
-    };
+    //从HTML文件检测点击流
+    checkPing(__html,'html')
     //从真实请求中检测点击流
     var tr = [];
     for(let r in __d.requests){
@@ -709,20 +722,36 @@ function proCheck(arg,callback) {
     }
     for(var i =0;i<checkResult.list.length;i++){
         if(checkResult.list[i].error_id == 1001){
-            checkResult.list[i] = extend(checkResult.list[i], checkPing(tr,'json'))
+            checkResult.list[i] = extend(checkResult.list[i], checkPing(tr,'request'))
         }
     }
     //处理例外
     var d =checkIgnore().toString() ;
     checkResult['ignore'] = d == '' ? 'none' : d;
 
+
+
     if(!callback){
         return new Promise((resolve,reject) => {
-            resolve({'checkResult':checkResult})
+            //检查版号
+            if(arg.config){
+            moduleConfig = arg.config;
+            var apiUrl = arg.config.isbnAPI.url + pageUrl;
+            checkISBN(apiUrl,__html).then((l)=>{
+                if(l){
+                    checkResult.list.push(l);
+
+                }
+                resolve({'checkResult':checkResult})
+                });
+            }else{
+                resolve({'checkResult':checkResult})
+            };
         })
     }else{
         callback({'checkResult':checkResult})
     }
+
 }
 exports.check=check;
 exports.proCheck=proCheck;
