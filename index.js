@@ -200,7 +200,7 @@ global.checkTitle = function (page) {
                     rt['error_info'] = '标题上必须含有“-腾讯游戏”目前标题内容：“'+titleText+'”';
             }
         } else {
-            rt['error_info'] = '页面title标签不存在';
+            rt['error_info'] = 'title标签不存在';
         };
     }else{
         rt['pass_info'] = '';
@@ -266,7 +266,7 @@ global.checkCharset  = function (page) {
     if (page.match(metaCharset) != null) {
         var regC =  new RegExp("gbk|gb2312|utf-8","ig");
     } else {
-        rt['error_info'] =  '页面编码没有声明，可能会引起页面错乱';
+        rt['error_info'] =  '编码没有声明，可能会引起页面错乱';
     };
     return rt;
 };
@@ -288,22 +288,22 @@ global.checkPing = function(con,source) {
         }
     }
     function f(data,url,source) {
-        var u = !url ? '' : ',URL为：'+url  ;
+        var u = !url ? '' : 'URL为：'+url  ;
         //检查html中的ping.js
         if(source != 'request'){
             if(data.indexOf('ping_tcss') != -1||data.indexOf('ping') != -1){
 
-                rt['pass_info'] = "页面统计代码已添加"+ u;
+                rt['pass_info'] = "统计代码已添加，上报"+ u;
                 __htmlPing = true;
                 rt['error_info'] = "";
                 flag = true;
             }else{
-                rt['error_info'] = "页面未添加统计代码";
+                rt['error_info'] = "未添加统计代码";
             }
         }else{
            //检查request中的真实上报
             if(data.indexOf('com&url') != -1){
-                rt['pass_info'] = "页面统计已正常上报，上报请求："+ u;
+                rt['pass_info'] = "统计已正常上报，上报"+ u;
                 __requestPing = true;
                 rt['error_info'] = "";
                 flag = true;
@@ -312,7 +312,7 @@ global.checkPing = function(con,source) {
                     rt['pass_info'] = "";
                     rt['error_info'] = "已正确添加统计代码。但未检测到正确的上报请求，请检查函数实例化是否正常";
                 }else{
-                    rt['error_info'] = "页面未添加统计代码";
+                    rt['error_info'] = "未添加统代码";
                 }
             }
         }
