@@ -310,7 +310,7 @@ global.checkPing = function(con,source) {
             }else{
                 if(__htmlPing){
                     rt['pass_info'] = "";
-                    rt['error_info'] = "已正确添加统计代码。但未检测到上报请求，请检查函数实例化是否正常";
+                    rt['error_info'] = "已正确添加统计代码。但未检测到正确的上报请求，请检查函数实例化是否正常";
                 }else{
                     rt['error_info'] = "页面未添加统计代码";
                 }
