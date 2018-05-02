@@ -330,6 +330,7 @@ global.checkPing = function(con,source) {
 //检测底部
 let __checkFootCon = false;
 global.checkFoot = function (content,type) {
+    if(checkIgnore().indexOf('foot') >= 0) return;
     const regex = /\/\/(game.gtimg.cn|ossweb-img.qq.com)\/images\/js(\/2018foot\/|\/)foot\.js/ig;
     const docUrl = 'http://tgideas.qq.com/webplat/info/news_version3/804/25810/25811/25812/25814/m16274/201803/700317.shtml';
     let rt = {};
