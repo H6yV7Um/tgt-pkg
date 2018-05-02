@@ -662,8 +662,14 @@ function check(arg,callback){
                             }
                             //从真实请求中检测点击流
                             for(let i =0;i<checkResult.list.length;i++){
-                                if(checkResult.list[i].error_id == 1001){
-                                    checkResult.list[i] = extend(checkResult.list[i], checkPing(requestInfo.log.ping,'request'))
+                                let __li = checkResult.list[i];
+                                //从请求中检测点击流
+                                if(__li.error_id == 1001){
+                                    __li = extend(__li, checkPing(requestInfo.log.ping,'request'))
+                                }
+                                //从请求中检测页脚
+                                if(__li.error_id == 1003){
+                                    __li = extend(__li, checkFoot(requestInfo.log.ping,'request'))
                                 }
                             }
 
@@ -771,11 +777,11 @@ function proCheck(arg,callback) {
     };
     for(let i =0;i<checkResult.list.length;i++){
         let __li = checkResult.list[i];
-        //从请求中检测页脚
+        //从请求中检测点击流
         if(__li.error_id == 1001){
             __li = extend(__li, checkPing(tr,'request'))
         }
-        //从请求中检测点击流
+        //从请求中检测页脚
         if(__li.error_id == 1003){
             __li = extend(__li, checkFoot(tr,'request'))
         }
