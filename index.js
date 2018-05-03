@@ -295,12 +295,12 @@ global.checkPing = function(con,source) {
         }
     }
     function f(data,url,source) {
-        let u = !url ? '' : 'URL为：'+url  ;
+        let u = !url ? '' : url  ;
         //检查html中的ping.js
         if(source != 'request'){
             if(data.indexOf('ping_tcss') != -1||data.indexOf('ping') != -1){
 
-                rt['pass_info'] = "统计代码已添加，上报"+ u;
+                rt['pass_info'] = "页面统计代码已添加，上报URL为："+ u;
                 __htmlPing = true;
                 rt['error_info'] = "";
                 flag = true;
@@ -310,7 +310,7 @@ global.checkPing = function(con,source) {
         }else{
            //检查request中的真实上报
             if(data.indexOf('com&url') != -1){
-                rt['pass_info'] = "统计已正常上报，上报"+ u;
+                rt['pass_info'] = "页面统计已正常上报，上报URL为："+ u;
                 __requestPing = true;
                 rt['error_info'] = "";
                 flag = true;
@@ -328,7 +328,6 @@ global.checkPing = function(con,source) {
     return rt;
 }
 //检测底部
-let __checkFootCon = false;
 global.checkFoot = function (content,type) {
     if(checkIgnore().indexOf('foot') >= 0) return;
     const regex = /\/\/(game.gtimg.cn|ossweb-img.qq.com)\/images\/js(\/2018foot\/|\/)foot\.js/ig;
@@ -367,7 +366,51 @@ global.checkFoot = function (content,type) {
         };
     }
     return rt;
-}
+};
+//检测PTT上报请求是否配置错误，只在proCheck方法中生效
+function checkPTTconfig(url,data) {
+    let checkAct = /\/(cp|act)\/a/ig;
+    let getActName = /\/(cp|act)\/a(\S*)\//;
+    let flag = false;
+    let ca = url.match(checkAct);
+    let rt = {};
+    let hasPTT = false;
+    const docUrl = 'http://tgideas.qq.com/ptt/'
+    rt['error_id'] = 2005;
+
+    //网址符合
+    if(ca && ca[0]){
+        let name = url.match(getActName)[2];
+        //轮询请求
+        for(let i=0;i<data.length;i++){
+            //请求中是否有PPT脚本
+            if(data[i].indexOf('ping_tcss_tgideas_https') > 0 ){
+                hasPTT = true;
+            }
+            //请求是否有PTT上报
+            let index = data[i].indexOf('pttsitetype');
+            if(index > 0 && !flag){
+                if(data[i].slice(index).indexOf(name) <= 0){
+                    rt['error_info'] = "页面统计参数配置错误，请检查PTT的setSite配置，文档："+docUrl;
+                }else{
+                    rt['pass_info'] = "页面统计参数配置信息正确"
+                }
+                flag = true;
+            }
+        }
+
+        if(!flag){
+            if(hasPTT){
+                rt['error_info'] = "未发现PTT统计上报请求，请检查PTT的setSite配置，文档："+docUrl;
+            }else{
+                //页面不包含PTT统计或不符合专题网址规则，则忽略此项检查
+                rt = false;
+            }
+        }
+
+    }
+    return rt ;
+};
 //检测ISBN
 global.checkISBN = function(url,page) {
     let rt = {};
@@ -736,9 +779,11 @@ function proCheck(arg,callback) {
 
     const __d = arg.json;
     const __html  = __d.html;
-    const pageUrl = __d.url
+    const pageUrl = __d.url;
+
     global.$ = cheerio.load(__html,{useHtmlParser2:false});
     const __requests  = __d.requests;
+
     //用户自定义
     if(typeof arg.custom == 'object' ){
         if(arg.custom.file .length>0){
@@ -775,6 +820,7 @@ function proCheck(arg,callback) {
     for(let r in __d.requests){
         tr.push(r);
     };
+
     for(let i =0;i<checkResult.list.length;i++){
         let __li = checkResult.list[i];
         //从请求中检测点击流
@@ -785,6 +831,13 @@ function proCheck(arg,callback) {
         if(__li.error_id == 1003){
             __li = extend(__li, checkFoot(tr,'request'))
         }
+    }
+    //检查PTT配置
+
+
+    var __cpc = checkPTTconfig(pageUrl,tr);
+    if(__cpc){
+        checkResult.list.push(__cpc)
     }
     //处理例外
     let d =checkIgnore().toString() ;
@@ -799,7 +852,6 @@ function proCheck(arg,callback) {
             checkISBN(apiUrl,__html).then((l)=>{
                 if(l){
                     checkResult.list.push(l);
-
                 }
                 resolve({'checkResult':checkResult})
                 });
