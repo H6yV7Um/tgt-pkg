@@ -328,42 +328,63 @@ global.checkPing = function(con,source) {
     return rt;
 }
 //检测底部
+let __hasCheckENV = false;
 global.checkFoot = function (content,type) {
     if(checkIgnore().indexOf('foot') >= 0) return;
     const regex = /\/\/(game.gtimg.cn|ossweb-img.qq.com)\/images\/js(\/2018foot\/|\/)foot\.js/ig;
     const docUrl = 'http://tgideas.qq.com/webplat/info/news_version3/804/25810/25811/25812/25814/m16274/201803/700317.shtml';
     let rt = {};
     let flag = false;
-    let match = null;
-    if(type == 'request'){
-        for(let i=0;i<content.length;i++){
-            let m  = content[i].match(regex);
-              if(!flag){
-                  match =  content[i].match(regex);
-                  if(match && match[0]){
-                      flag =true;
-                  }
-              }
-        }
-        if(flag){
+    let matchR = null;
+    let viewport = $('meta[name=viewport]');
+    let copyrightReg = /TENCENT.*\RESERVED/ig;
+    let r = !!copyrightReg.test(content);
+    //无viewport及copyright不为空检查页脚
+    if(type != 'request' && viewport.length == 0 && r) {__hasCheckENV = true}
+    if(__hasCheckENV){
+        //检查请求
+        if (type == 'request') {
+            for (let i = 0; i < content.length; i++) {
+                let m = content[i].match(regex);
+                if (!flag) {
+                    matchR = content[i].match(regex);
+                    if (matchR && matchR[0]) {
+                        flag = true;
+                    }
+                }
+            }
+            if (flag) {
+                i();
+            }
+        //检查页面
+        } else {
+            flag = true;
+            matchR = content.match(regex);
             i();
+        };
+
+        function i() {
+            rt['error_info'] = '';
+            if (matchR && matchR[0] && flag) {
+                if (matchR[0].indexOf('2018foot') <= 0) {
+                    rt['pass_info'] = '建议使用按照最新规范插入页脚，规范地址：' + docUrl;
+                } else {
+                    rt['pass_info'] = '通用页脚已添加'
+                }
+            } else {
+                rt['error_info'] = "未添加IEG页面通用页脚。规范地址：" + docUrl;
+            }
+            ;
         }
     }else{
-        flag = true;
-        match = content.match(regex);
-        i();
-    };
-    function i() {
-        rt['error_info'] = '';
-        if (match && match[0] && flag) {
-            if(match[0].indexOf('2018foot') <= 0){
-                rt['pass_info'] = '建议使用按照最新规范插入页脚，规范地址：'+ docUrl;
-            }else{
-                rt['pass_info'] = ''
-            }
-        } else {
-            rt['error_info'] = "未添加IEG页面通用页脚。规范地址："+ docUrl;
-        };
+        rt = {};
+        if(viewport.length > 0){
+            rt['pass_info'] = '当前页面可能是移动端页面,已跳过检查通用页脚'
+        }else if(!r){
+            rt['pass_info'] = '当前页面未包含底部基本元素“TENCENT. ALL RIGHTS RESERVED”,已跳过检查通用页脚'
+        }
+
+
     }
     return rt;
 };
@@ -408,6 +429,8 @@ function checkPTTconfig(url,data) {
             }
         }
 
+    }else{
+        rt['pass_info'] = "当前页面不符合专题页面网址规则，已跳过检查PTT配置信息。"
     }
     return rt ;
 };
