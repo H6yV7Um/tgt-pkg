@@ -336,11 +336,10 @@ global.checkFoot = function (content,type) {
     let rt = {};
     let flag = false;
     let matchR = null;
-    let viewport = $('meta[name=viewport]');
     let copyrightReg = /TENCENT.*\RESERVED/ig;
     let r = !!copyrightReg.test(content);
-    //无viewport及copyright不为空检查页脚
-    if(type != 'request' && viewport.length == 0 && r) {__hasCheckENV = true}
+    //copyright不为空检查页脚
+    if(type != 'request'  && r) {__hasCheckENV = true}
     if(__hasCheckENV){
         //检查请求
         if (type == 'request') {
@@ -378,9 +377,7 @@ global.checkFoot = function (content,type) {
         }
     }else{
         rt = {};
-        if(viewport.length > 0){
-            rt['pass_info'] = '当前页面可能是移动端页面,已跳过检查通用页脚'
-        }else if(!r){
+        if(!r){
             rt['pass_info'] = '当前页面未包含底部基本元素“TENCENT. ALL RIGHTS RESERVED”,已跳过检查通用页脚'
         }
 
