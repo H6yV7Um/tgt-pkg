@@ -98,13 +98,6 @@ const initCheck = [
       'rule':{'function':'checkPing'},//检查函数
       'run':true,  //是否默认运行
       'error_id':1001//错误编码 http://tapd.oa.com/TGtest/markdown_wikis/#1020355671006485867
-   },
-   {
-      'name':'通用页脚',//检查项的名称
-      'enname':'foot',//英文别名
-      'rule':{'function':'checkFoot'},//检查函数
-      'run':true,  //是否默认运行
-      'error_id':1003//错误编码 http://tapd.oa.com/TGtest/markdown_wikis/#1020355671006485867
    }
 ]
 
@@ -300,7 +293,7 @@ global.checkPing = function(con,source) {
         if(source != 'request'){
             if(data.indexOf('ping_tcss') != -1||data.indexOf('ping') != -1){
 
-                rt['pass_info'] = "页面统计代码已添加，上报URL为："+ u;
+                rt['pass_info'] = "页面统计代码已添加";
                 __htmlPing = true;
                 rt['error_info'] = "";
                 flag = true;
@@ -323,66 +316,56 @@ global.checkPing = function(con,source) {
                 }
             }
         }
-
     };
     return rt;
 }
 //检测底部
-let __hasCheckENV = false;
-global.checkFoot = function (content,type) {
+// let __hasCheckENV = false;
+global.checkFoot = function (req,content) {
+
     if(checkIgnore().indexOf('foot') >= 0) return;
     const regex = /\/\/(game.gtimg.cn|ossweb-img.qq.com)\/images\/js(\/2018foot\/|\/)foot\.js/ig;
     const docUrl = 'http://tgideas.qq.com/webplat/info/news_version3/804/25810/25811/25812/25814/m16274/201803/700317.shtml';
-    let rt = {};
+    let rt = {'error_id':1003,'pass_info':'','enname':'foot'};
     let flag = false;
     let matchR = null;
-    let copyrightReg = /TENCENT.*\RESERVED/ig;
+    let copyrightReg = /TENCENT.*RESERVED/ig;
     let r = !!copyrightReg.test(content);
-    //copyright不为空检查页脚
-    if(type != 'request'  && r) {__hasCheckENV = true}
-    if(__hasCheckENV){
-        //检查请求
-        if (type == 'request') {
-            for (let i = 0; i < content.length; i++) {
-                let m = content[i].match(regex);
-                if (!flag) {
-                    matchR = content[i].match(regex);
-                    if (matchR && matchR[0]) {
-                        flag = true;
-                    }
-                }
-            }
-            if (flag) {
-                i();
-            }
-        //检查页面
-        } else {
-            flag = true;
-            matchR = content.match(regex);
-            i();
-        };
 
-        function i() {
-            rt['error_info'] = '';
-            if (matchR && matchR[0] && flag) {
-                if (matchR[0].indexOf('2018foot') <= 0) {
-                    rt['pass_info'] = '建议使用按照最新规范插入页脚，规范地址：' + docUrl;
-                } else {
-                    rt['pass_info'] = '通用页脚已添加'
+    if(!!r) {
+        for (let i = 0; i < req.length; i++) {
+            let m = req[i].match(regex);
+            if (!flag) {
+                matchR = req[i].match(regex);
+                if (matchR && matchR[0]) {
+                    flag = true;
                 }
-            } else {
-                rt['error_info'] = "未添加IEG页面通用页脚。规范地址：" + docUrl;
             }
-            ;
+        }
+        if (flag) {
+            i();
+        }else{
+            rt['error_info'] = "未添加IEG页面通用页脚。规范地址：" + docUrl;
         }
     }else{
-        rt = {};
-        if(!r){
-            rt['pass_info'] = '当前页面未包含底部基本元素“TENCENT. ALL RIGHTS RESERVED”,已跳过检查通用页脚'
-        }
-
-
+        rt['pass_info'] = '当前页面未包含底部基本元素“TENCENT. ALL RIGHTS RESERVED”,已跳过检查通用页脚'
     }
+
+
+    function i() {
+        rt['error_info'] = '';
+        if (matchR && matchR[0] && flag) {
+            if (matchR[0].indexOf('2018foot') <= 0) {
+                rt['pass_info'] = '建议使用按照最新规范插入页脚，规范地址：' + docUrl;
+            } else {
+                rt['pass_info'] = '通用页脚已添加'
+            }
+        } else {
+            rt['error_info'] = "未添加IEG页面通用页脚。规范地址：" + docUrl;
+        }
+        ;
+    }
+
     return rt;
 };
 //检测PTT上报请求是否配置错误，只在proCheck方法中生效
@@ -391,7 +374,7 @@ function checkPTTconfig(url,data) {
     let getActName = /\/(cp|act)\/a(\S*)\//;
     let flag = false;
     let ca = url.match(checkAct);
-    let rt = {};
+    let rt = {'enname':'ptt'};
     let hasPTT = false;
     const docUrl = 'http://tgideas.qq.com/ptt/'
     rt['error_id'] = 2005;
@@ -433,7 +416,7 @@ function checkPTTconfig(url,data) {
 };
 //检测ISBN
 global.checkISBN = function(url,page) {
-    let rt = {};
+    let rt = {'enname':'isbn'};
     let host = moduleConfig.isbnAPI.host
     rt['error_id'] = 1002;
     rt['name'] = '版号';
@@ -441,39 +424,39 @@ global.checkISBN = function(url,page) {
 
     return new Promise((resolve,reject) => {
         if(checkIgnore().indexOf('isbn') >= 0) resolve(0);
-        request(url,function (err,response,body) {
-            if(err) reject(err);
-            let getApi = JSON.parse(body)[0];
-            if(typeof  getApi != 'undefined' ){
-                let pointISBN = page.indexOf('ISBN');
-                let ISBN = pointISBN <= 0 ? '' :fomatString(page.substring(pointISBN,pointISBN+22));
-                let m = page.match(/新广出审(\S*)号/);
-                let Approvalno = !m ? '': fomatString(page.match(/新广出审(\S*)号/)[0]);
-                //比对ISBN
-                if(ISBN != '' ){
-                    if(ISBN == fomatString(getApi.isbnno)){
-                        rt['pass_info'] = "";
-                    }else{
-                        rt['error_info'] = "互联网游戏出版物ISBN号不正确"
-                    }
+    request(url,function (err,response,body) {
+        if(err) reject(err);
+        let getApi = JSON.parse(body)[0];
+        if(typeof  getApi != 'undefined' ){
+            let pointISBN = page.indexOf('ISBN');
+            let ISBN = pointISBN <= 0 ? '' :fomatString(page.substring(pointISBN,pointISBN+22));
+            let m = page.match(/新广出审(\S*)号/);
+            let Approvalno = !m ? '': fomatString(page.match(/新广出审(\S*)号/)[0]);
+            //比对ISBN
+            if(ISBN != '' ){
+                if(ISBN == fomatString(getApi.isbnno)){
+                    rt['pass_info'] = "";
+                }else{
+                    rt['error_info'] = "互联网游戏出版物ISBN号不正确"
                 }
-                if(Approvalno != '' ){
-                    if(Approvalno == fomatString(getApi.approvalno)){
-                        rt['pass_info'] = "";
-                    }else{
-                        rt['error_info'] = "新广出审批号出错"
-                    }
-                }
-                resolve(rt);
-            }else{
-                resolve(rt);
             }
+            if(Approvalno != '' ){
+                if(Approvalno == fomatString(getApi.approvalno)){
+                    rt['pass_info'] = "";
+                }else{
+                    rt['error_info'] = "新广出审批号出错"
+                }
+            }
+            resolve(rt);
+        }else{
+            resolve(rt);
+        }
 
-        });
-
-    }).catch((e)=>{
-        console.error(e);
     });
+
+}).catch((e)=>{
+        console.error(e);
+});
 };
 //本地图片ossweb-img目录检查
 function  checkImage() {
@@ -618,13 +601,12 @@ function  imageResult(size,online) {
     return temp;
 }
 
-global.$ = null;
+global.$ = {};
 
 function readPage(arg) {
     return new Promise((resolve,reject) => {
             if(typeof arg.file.name != 'undefined' && typeof arg.file.name !== ''){
                 let c = typeof  arg.file.charset != 'undefined' ? arg.file.charset : 'utf-8'
-
 
                 fs.readFile(arg.file.name,function (err, buffer) {
                     let p =  iconv.decode(buffer,c);
@@ -646,7 +628,7 @@ function readPage(arg) {
 }
 //排除测试页面及include页面
 function standardPage(page,checkResult) {
-    if($('head meta').length === 0 || $('body').text() == ''){
+    if($('meta').length === 0 || $('body').text() == ''){
         checkResult['pageStandard'] ='false';
     }else{
         checkResult['pageStandard'] ='true';
@@ -688,6 +670,7 @@ function check(arg,callback){
                     if(temp){
                         temp['error_id'] = data.error_id;
                         temp['name'] = data.name;
+                        temp['enname'] = data.enname;
                         checkResult.list.push(temp);
                     }
 
@@ -730,11 +713,10 @@ function check(arg,callback){
                                 if(__li.error_id == 1001){
                                     __li = extend(__li, checkPing(requestInfo.log.ping,'request'))
                                 }
-                                //从请求中检测页脚
-                                if(__li.error_id == 1003){
-                                    __li = extend(__li, checkFoot(requestInfo.log.ping,'request'))
-                                }
                             }
+                            //检查页脚
+                            checkResult.list.push(checkFoot(requestInfo.log.js,page));
+
 
                             let apiUrl = moduleConfig.isbnAPI.url + requestInfo.log.pages[0].isbnlink;
                             checkISBN(apiUrl,page).then((l)=>{
@@ -800,7 +782,7 @@ function proCheck(arg,callback) {
     const __d = arg.json;
     const __html  = __d.html;
     const pageUrl = __d.url;
-
+    global.$ = null;
     global.$ = cheerio.load(__html,{useHtmlParser2:false});
     const __requests  = __d.requests;
 
@@ -826,6 +808,7 @@ function proCheck(arg,callback) {
             if(temp){
                 temp['error_id'] = data.error_id;
                 temp['name'] = data.name;
+                temp['enname'] = data.enname;
                 checkResult.list.push(temp);
             }
 
@@ -847,11 +830,10 @@ function proCheck(arg,callback) {
         if(__li.error_id == 1001){
             __li = extend(__li, checkPing(tr,'request'))
         }
-        //从请求中检测页脚
-        if(__li.error_id == 1003){
-            __li = extend(__li, checkFoot(tr,'request'))
-        }
+
     }
+    //检测页脚
+    checkResult.list.push(checkFoot(tr,__html))
     //检查PTT配置
 
 
