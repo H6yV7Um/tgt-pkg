@@ -277,7 +277,7 @@ global.checkPing = function(con,source) {
     if(checkIgnore().indexOf('ping') >= 0) return 0;
     let rt = {};
     let flag = false;
-    let reg = /pingfore.qq.com.*[^hot].&url=/ig;
+    let reg = /pingfore.qq.com.*[^hot]&url=/ig;
     if(typeof  con === 'string'){
         f(con);
     }else{
@@ -311,7 +311,7 @@ global.checkPing = function(con,source) {
             }else{
                 if(__htmlPing){
                     rt['pass_info'] = "";
-                    rt['error_info'] = "已正确添加统计代码。但未检测到正确的上报请求，请检查函数实例化是否正常";
+                    rt['error_info'] = "已正确添加统计代码。但未检测到正确的上报请求，请检查点击流脚本是否正常加载、pgvMain函数是否实例化";
                 }else{
                     rt['error_info'] = "未添加统代码";
                 }
@@ -387,7 +387,7 @@ function checkPTTconfig(url,data) {
         //轮询请求
         for(let i=0;i<data.length;i++){
             //请求中是否有PPT脚本
-            if(data[i].indexOf('ping_tcss_tgideas_https') > 0 ){
+            if(data[i].indexOf('PTT/ping_tcss_tgideas') > 0 ){
                 hasPTT = true;
             }
             //请求是否有PTT上报
@@ -832,6 +832,14 @@ function proCheck(arg,callback) {
         if(__li.error_id == 1001){
             __li = extend(__li, checkPing(tr,'request'))
         }
+        //点击流正常则检查PTT
+        if(__li.error_id == 1001 && __li.error_info == ''){
+            let __cpc = checkPTTconfig(pageUrl,tr);
+
+            if(__cpc){
+                checkResult.list.push(__cpc)
+            }
+        }
 
     }
     //检测页脚
@@ -839,12 +847,7 @@ function proCheck(arg,callback) {
     //检查PTT配置
 
 
-    var __cpc = checkPTTconfig(pageUrl,tr);
-    if(__cpc){
-        checkResult.list.push(__cpc)
-    }
     //处理例外
-    console.log(checkIgnore())
 
     let d =checkIgnore().toString() ;
     if(d !==''){
