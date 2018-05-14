@@ -277,6 +277,7 @@ global.checkPing = function(con,source) {
     if(checkIgnore().indexOf('ping') >= 0) return 0;
     let rt = {};
     let flag = false;
+    let reg = /pingfore.qq.com.*[^hot].&url=/ig;
     if(typeof  con === 'string'){
         f(con);
     }else{
@@ -302,7 +303,7 @@ global.checkPing = function(con,source) {
             }
         }else{
            //检查request中的真实上报
-            if(data.indexOf('com&url') != -1){
+            if(reg.test(data)){
                 rt['pass_info'] = "页面统计已正常上报，上报URL为："+ u;
                 __requestPing = true;
                 rt['error_info'] = "";
@@ -370,6 +371,7 @@ global.checkFoot = function (req,content) {
 };
 //检测PTT上报请求是否配置错误，只在proCheck方法中生效
 function checkPTTconfig(url,data) {
+    if(checkIgnore().indexOf('ptt') >= 0) return;
     let checkAct = /\/(cp|act)\/a/ig;
     let getActName = /\/(cp|act)\/a(\S*)\//;
     let flag = false;
@@ -756,7 +758,7 @@ function check(arg,callback){
           checkResult['ignore'] = 'none';
           if(checkIgnore()[0] == 'all'){
                 //回调
-                checkResult.list = {};
+                checkResult.list = [];
           }else{
                let d =checkIgnore().toString() ;
                 checkResult['ignore'] = d == '' ? 'none' : d;
@@ -842,9 +844,17 @@ function proCheck(arg,callback) {
         checkResult.list.push(__cpc)
     }
     //处理例外
-    let d =checkIgnore().toString() ;
-    checkResult['ignore'] = d == '' ? 'none' : d;
+    console.log(checkIgnore())
 
+    let d =checkIgnore().toString() ;
+    if(d !==''){
+        checkResult['ignore'] = d;
+        if(checkIgnore().indexOf('all') >= 0) {
+            checkResult.list = [];
+        }
+    }else{
+        checkResult['ignore'] = 'none'
+    }
     if(!callback){
         return new Promise((resolve,reject) => {
             //检查版号
@@ -852,7 +862,7 @@ function proCheck(arg,callback) {
             moduleConfig = arg.config;
             let apiUrl = arg.config.isbnAPI.url + pageUrl;
             checkISBN(apiUrl,__html).then((l)=>{
-                if(l){
+                if(l && checkIgnore().indexOf('all') < 0 ){
                     checkResult.list.push(l);
                 }
                 resolve({'checkResult':checkResult})
