@@ -185,7 +185,7 @@ global.checkTitle = function (page) {
     let title = $('title');
     let titleText = $('title').text();
     let rt = {};
-    let checkRe = /\-\s?腾讯(?:游戏)/;
+    let checkRe = /腾讯(?:游戏)/g;
     let viewport = $('meta[name=viewport]');
     //有viewport的移动端页面不检测标题规范
     if(viewport.length == 0){
