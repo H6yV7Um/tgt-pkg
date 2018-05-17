@@ -1,6 +1,6 @@
 {
   "name": "tgt-pkg",
-  "version": "1.6.8",
+  "version": "1.6.9",
   "description": "IEG网站质量测试通用模块",
   "main": "index.js",
   "scripts": {
