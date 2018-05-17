@@ -374,6 +374,7 @@ function checkPTTconfig(url,data) {
     if(checkIgnore().indexOf('ptt') >= 0) return;
     let checkAct = /\/(cp|act)\/a/ig;
     let getActName = /\/(cp|act)\/a(\S*)\//;
+
     let flag = false;
     let ca = url.match(checkAct);
     let rt = {'enname':'ptt'};
@@ -383,7 +384,7 @@ function checkPTTconfig(url,data) {
 
     //网址符合
     if(ca && ca[0]){
-        let name = url.match(getActName)[2];
+        let name = url.match(getActName)[2].replace(/_|\./g, "*-*");
         //轮询请求
         for(let i=0;i<data.length;i++){
             //请求中是否有PPT脚本
