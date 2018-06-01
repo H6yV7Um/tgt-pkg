@@ -18,10 +18,10 @@ const request = require('request');
 
 
 /*参数*/
-var localPicPath = '';
-var requestArg = false;
-var requestInfo = null;
-var moduleConfig = null;
+let localPicPath = '';
+let requestArg = false;
+let requestInfo = null;
+let moduleConfig = null;
 //随机算法
 function shuffle(arr){
     let n = arr.length, random;
@@ -42,7 +42,7 @@ function checkFileExists(filepath){
 
 // 合并对象
 function extend(target, source) {
-    for (var obj in source) {
+    for (let obj in source) {
         target[obj] = source[obj];
     }
     return target;
@@ -54,9 +54,9 @@ function fomatString(str) {
 
 //去除特殊字符
 function filterStr(str) {
-    var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？%+_]");
-    var specialStr = "";
-    for(var i=0;i<str.length;i++)
+    let pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？%+_]");
+    let specialStr = "";
+    for(let i=0;i<str.length;i++)
     {
         specialStr += str.substr(i, 1).replace(pattern, '');
     }
@@ -106,15 +106,15 @@ const initCheck = [
 
 //自定义
 global.userCustom = function (page,type,config,checkResult,v) {
-    var keyB = 'custom_file_';
-    var temp = {};
+    let keyB = 'custom_file_';
+    let temp = {};
     config  = config.custom;
     //文件中的自定义检查项
     if(type == 'file'){
-        for(var i = 0;i< config.file.length;i++){
+        for(let i = 0;i< config.file.length;i++){
             temp = {};
-            var f = config.file[i];
-            var name = f.name == ''  ?keyB+i : f.name;
+            let f = config.file[i];
+            let name = f.name == ''  ?keyB+i : f.name;
             if(f.type == 'tag'){
                 temp['error_id'] = keyB+i;
                 if($(f.rule).length == 0){
@@ -123,15 +123,15 @@ global.userCustom = function (page,type,config,checkResult,v) {
                     temp['pass_info'] = 'length：'+$(f.rule).length;
                 }
             }else if(f.type=='char'){
-                temp = charCheck(f.rule,name);
+                temp = charCheck(f,name);
             }
             temp['name'] = name;
             checkResult.list.push(JSON.parse(JSON.stringify(temp)));
         }
         function charCheck(c,name) {
-            var m = !f.mode ? 'ig':f.mode;
-            var reg = new RegExp(c,m);
-            var re = page.match(reg);
+            let m = !c.mode ? 'ig':c.mode;
+            let reg = new RegExp(c.rule,m);
+            let re = page.match(reg);
             if(!reg.test(page)){
                 temp['error_info'] = name +'不存在';
             }else{
@@ -143,10 +143,10 @@ global.userCustom = function (page,type,config,checkResult,v) {
     //请求中的自定义检查项
     }else if(type == 'request'){
 
-        for(var i = 0;i< config.request.length;i++){
+        for(let i = 0;i< config.request.length;i++){
             temp = {};
-            var f = config.request[i];
-            var has = false;
+            let f = config.request[i];
+            let has = false;
             temp.name = f.name;
             temp['error_id'] = 'custom_request_'+i;
             if(f.type == 'source'){
@@ -182,11 +182,11 @@ global.userCustom = function (page,type,config,checkResult,v) {
 //检测标题
 global.checkTitle = function (page) {
     if(checkIgnore().indexOf('title') >= 0) return 0;
-    var title = $('title');
-    var titleText = $('title').text();
-    var rt = {};
-    var checkRe = /\-\s?腾讯(?:游戏)/;
-    var viewport = $('meta[name=viewport]');
+    let title = $('title');
+    let titleText = $('title').text();
+    let rt = {};
+    let checkRe = /腾讯(?:游戏)/g;
+    let viewport = $('meta[name=viewport]');
     //有viewport的移动端页面不检测标题规范
     if(viewport.length == 0){
         if (title.length > 0) {
@@ -211,9 +211,9 @@ global.checkTitle = function (page) {
 //检测关键词
 global.checkKeywords  = function (page) {
     if(checkIgnore().indexOf('keywords') >= 0) return 0;
-    var metaKeywords = $("meta[name$='eywords']");
-    var con = metaKeywords.attr("content");
-    var rt = {};
+    let metaKeywords = $("meta[name$='eywords']");
+    let con = metaKeywords.attr("content");
+    let rt = {};
     if (metaKeywords.length > 0 && con.length > 0) {
             rt['pass_info'] = "";
     } else if(metaKeywords.length == 0) {
@@ -226,9 +226,9 @@ global.checkKeywords  = function (page) {
 //检测描述
 global.checkDescription  = function (page) {
     if(checkIgnore().indexOf('description') >= 0) return 0;
-    var metaDescription = $("meta[name$='escription']");
-    var con = metaDescription.attr("content");
-    var rt = {};
+    let metaDescription = $("meta[name$='escription']");
+    let con = metaDescription.attr("content");
+    let rt = {};
     if (metaDescription.length > 0 && con.length >0) {
             rt['pass_info'] = "";
     } else {
@@ -247,9 +247,9 @@ global.checkDescription  = function (page) {
 }
 //检测排除项
 global.checkIgnore  = function () {
-    var metaIgnore = $("meta[name$='ignore']");
-    var con = metaIgnore.attr("content");
-    var rt = '';
+    let metaIgnore = $("meta[name$='ignore']");
+    let con = metaIgnore.attr("content");
+    let rt = '';
     if (metaIgnore.length > 0 && con.length >0) {
         //checkResult.push({'ignore':'all'})
         rt = con.split(',');
@@ -259,12 +259,12 @@ global.checkIgnore  = function () {
 //检测编码
 global.checkCharset  = function (page) {
     if(checkIgnore().indexOf('charset') >= 0) return 0;
-    var metaCharset = /<meta[^>]*?charset=(["'/>]?)([^"'\s/>]+)\1[^>]*?>/gim;
-    var charset = null;
-    var rt = {};
+    let metaCharset = /<meta[^>]*?charset=(["'/>]?)([^"'\s/>]+)\1[^>]*?>/gim;
+    let charset = null;
+    let rt = {};
 
     if (page.match(metaCharset) != null) {
-        var regC =  new RegExp("gbk|gb2312|utf-8","ig");
+        let regC =  new RegExp("gbk|gb2312|utf-8","ig");
     } else {
         rt['error_info'] =  '编码没有声明，可能会引起页面错乱';
     };
@@ -275,25 +275,26 @@ let __htmlPing = false;
 let __requestPing = false;
 global.checkPing = function(con,source) {
     if(checkIgnore().indexOf('ping') >= 0) return 0;
-    var rt = {};
-    var flag = false;
+    let rt = {};
+    let flag = false;
+    let reg = /pingfore.qq.com.*[^hot]&url=/ig;
     if(typeof  con === 'string'){
         f(con);
     }else{
-        for (var i = 0; i <  con.length; i++) {
-            var di  = con[i];
+        for (let i = 0; i <  con.length; i++) {
+            let di  = con[i];
             if(!flag){
                 f(di,di,source);
             }
         }
     }
     function f(data,url,source) {
-        var u = !url ? '' : 'URL为：'+url  ;
+        let u = !url ? '' : url  ;
         //检查html中的ping.js
         if(source != 'request'){
             if(data.indexOf('ping_tcss') != -1||data.indexOf('ping') != -1){
 
-                rt['pass_info'] = "统计代码已添加，上报"+ u;
+                rt['pass_info'] = "页面统计代码已添加";
                 __htmlPing = true;
                 rt['error_info'] = "";
                 flag = true;
@@ -302,76 +303,172 @@ global.checkPing = function(con,source) {
             }
         }else{
            //检查request中的真实上报
-            if(data.indexOf('com&url') != -1){
-                rt['pass_info'] = "统计已正常上报，上报"+ u;
+            if(reg.test(data)){
+                rt['pass_info'] = "页面统计已正常上报，上报URL为："+ u;
                 __requestPing = true;
                 rt['error_info'] = "";
                 flag = true;
             }else{
                 if(__htmlPing){
                     rt['pass_info'] = "";
-                    rt['error_info'] = "已正确添加统计代码。但未检测到正确的上报请求，请检查函数实例化是否正常";
+                    rt['error_info'] = "已正确添加统计代码。但未检测到正确的上报请求，请检查点击流脚本是否正常加载、pgvMain函数是否实例化";
                 }else{
                     rt['error_info'] = "未添加统代码";
                 }
             }
         }
-
     };
     return rt;
 }
-//点击流检测
+//检测底部
+// let __hasCheckENV = false;
+global.checkFoot = function (req,content) {
+
+    if(checkIgnore().indexOf('foot') >= 0) return;
+    const regex = /\/\/(game.gtimg.cn|ossweb-img.qq.com)\/images\/js(\/2018foot\/|\/)foot\.js/ig;
+    const docUrl = 'http://tgideas.qq.com/webplat/info/news_version3/804/25810/25811/25812/25814/m16274/201803/700317.shtml';
+    let rt = {'error_id':1003,'pass_info':'','enname':'foot'};
+    let flag = false;
+    let matchR = null;
+    let copyrightReg = /TENCENT.*RESERVED/ig;
+    let r = !!copyrightReg.test(content);
+
+    if(!!r) {
+        for (let i = 0; i < req.length; i++) {
+            let m = req[i].match(regex);
+            if (!flag) {
+                matchR = req[i].match(regex);
+                if (matchR && matchR[0]) {
+                    flag = true;
+                }
+            }
+        }
+        if (flag) {
+            i();
+        }else{
+            rt['error_info'] = "未添加IEG页面通用页脚。规范地址：" + docUrl;
+        }
+    }else{
+        rt['pass_info'] = '当前页面未包含底部基本元素“TENCENT. ALL RIGHTS RESERVED”,已跳过检查通用页脚'
+    }
+
+
+    function i() {
+        rt['error_info'] = '';
+        if (matchR && matchR[0] && flag) {
+            if (matchR[0].indexOf('2018foot') <= 0) {
+                rt['pass_info'] = '建议使用按照最新规范插入页脚，规范地址：' + docUrl;
+            } else {
+                rt['pass_info'] = '通用页脚已添加'
+            }
+        } else {
+            rt['error_info'] = "未添加IEG页面通用页脚。规范地址：" + docUrl;
+        }
+        ;
+    }
+
+    return rt;
+};
+//检测PTT上报请求是否配置错误，只在proCheck方法中生效
+function checkPTTconfig(url,data) {
+    if(checkIgnore().indexOf('ptt') >= 0) return;
+    let checkAct = /\/(cp|act)\/a/ig;
+    let getActName = /\/(cp|act)\/a(\S*)\//;
+
+    let flag = false;
+    let ca = url.match(checkAct);
+    let rt = {'enname':'ptt'};
+    let hasPTT = false;
+    const docUrl = 'http://tgideas.qq.com/ptt/'
+    rt['error_id'] = 2005;
+
+    //网址符合
+    if(ca && ca[0]){
+        let name = url.match(getActName)[2].replace(/_|\./g, "*-*");
+        //轮询请求
+        for(let i=0;i<data.length;i++){
+            //请求中是否有PPT脚本
+            if(data[i].indexOf('PTT/ping_tcss_tgideas') > 0 ){
+                hasPTT = true;
+            }
+            //请求是否有PTT上报
+            let index = data[i].indexOf('pttsitetype');
+            if(index > 0 && !flag){
+                if(data[i].slice(index).indexOf(name) <= 0){
+                    rt['error_info'] = "页面统计参数配置错误，请检查PTT的setSite配置，文档："+docUrl;
+                }else{
+                    rt['pass_info'] = "页面统计参数配置信息正确"
+                }
+                flag = true;
+            }
+        }
+
+        if(!flag){
+            if(hasPTT){
+                rt['error_info'] = "未发现PTT统计上报请求，请检查PTT的setSite配置，文档："+docUrl;
+            }else{
+                //页面不包含PTT统计或不符合专题网址规则，则忽略此项检查
+                rt = false;
+            }
+        }
+
+    }else{
+        rt['pass_info'] = "当前页面不符合专题页面网址规则，已跳过检查PTT配置信息。"
+    }
+    return rt ;
+};
+//检测ISBN
 global.checkISBN = function(url,page) {
-    var rt = {};
-    var host = moduleConfig.isbnAPI.host
+    let rt = {'enname':'isbn'};
+    let host = moduleConfig.isbnAPI.host
     rt['error_id'] = 1002;
     rt['name'] = '版号';
     rt['pass_info'] = '';
 
     return new Promise((resolve,reject) => {
         if(checkIgnore().indexOf('isbn') >= 0) resolve(0);
-        request(url,function (err,response,body) {
-            if(err) reject(err);
-            var getApi = JSON.parse(body)[0];
-            if(typeof  getApi != 'undefined' ){
-                var pointISBN = page.indexOf('ISBN');
-                var ISBN = pointISBN <= 0 ? '' :fomatString(page.substring(pointISBN,pointISBN+22));
-                var m = page.match(/新广出审(\S*)号/);
-                var Approvalno = !m ? '': fomatString(page.match(/新广出审(\S*)号/)[0]);
-                //比对ISBN
-                if(ISBN != '' ){
-                    if(ISBN == fomatString(getApi.isbnno)){
-                        rt['pass_info'] = "";
-                    }else{
-                        rt['error_info'] = "互联网游戏出版物ISBN号不正确"
-                    }
+    request(url,function (err,response,body) {
+        if(err) reject(err);
+        let getApi = JSON.parse(body)[0];
+        if(typeof  getApi != 'undefined' ){
+            let pointISBN = page.indexOf('ISBN');
+            let ISBN = pointISBN <= 0 ? '' :fomatString(page.substring(pointISBN,pointISBN+22));
+            let m = page.match(/新广出审(\S*)号/);
+            let Approvalno = !m ? '': fomatString(page.match(/新广出审(\S*)号/)[0]);
+            //比对ISBN
+            if(ISBN != '' ){
+                if(ISBN == fomatString(getApi.isbnno)){
+                    rt['pass_info'] = "";
+                }else{
+                    rt['error_info'] = "互联网游戏出版物ISBN号不正确"
                 }
-                if(Approvalno != '' ){
-                    if(Approvalno == fomatString(getApi.approvalno)){
-                        rt['pass_info'] = "";
-                    }else{
-                        rt['error_info'] = "新广出审批号出错"
-                    }
-                }
-                resolve(rt);
-            }else{
-                resolve(rt);
             }
+            if(Approvalno != '' ){
+                if(Approvalno == fomatString(getApi.approvalno)){
+                    rt['pass_info'] = "";
+                }else{
+                    rt['error_info'] = "新广出审批号出错"
+                }
+            }
+            resolve(rt);
+        }else{
+            resolve(rt);
+        }
 
-        });
-
-    }).catch((e)=>{
-        console.error(e);
     });
+
+}).catch((e)=>{
+        console.error(e);
+});
 };
 //本地图片ossweb-img目录检查
 function  checkImage() {
     return new Promise((resolve,reject) => {
-    var fileList = [];
-    var normalSize = 0;
-    var l = false;
-    var optimizeSize = 0;
-    var canOptimizeSize  = 0;
+    let fileList = [];
+    let normalSize = 0;
+    let l = false;
+    let optimizeSize = 0;
+    let canOptimizeSize  = 0;
     //路径斜杠转化
     function fp(path){
         path=path.replace(/\\+/g,'/');
@@ -379,7 +476,7 @@ function  checkImage() {
     }
     //图片文件遍历
     function walk(path){
-        var dirList = fs.readdirSync(path);
+        let dirList = fs.readdirSync(path);
         dirList.forEach(function(item){
             if(l){return false;}
             if(fs.statSync(path + '/' + item).isDirectory()){
@@ -407,7 +504,7 @@ function  checkImage() {
                     imageminGifsicle()
                 ]
             }).then(files => {
-                for(var i= 0;i<files.length;i++){
+                for(let i= 0;i<files.length;i++){
                 optimizeSize += files[i].data.byteLength;
             }
 
@@ -428,20 +525,20 @@ function  checkOnlineImage(pic) {
 
     function getPic(url) {
         return new Promise((resolve,reject) => {
-            var  option = {
+            let  option = {
                 host : '10.194.0.196',
                 port: 80,
                 path: url
             }
             const req =  http.get(option,(res) => {
-                var chunks = [];
-            var size = 0;
+                let chunks = [];
+            let size = 0;
             res.on('data', function (chunk) {
                 chunks.push(chunk);
                 size += chunk.length;
             });
             res.on('end', function () {
-                var data = null;
+                let data = null;
                 switch(chunks.length) {
                     case 0: data = new Buffer(0);
                         break;
@@ -449,8 +546,8 @@ function  checkOnlineImage(pic) {
                         break;
                     default:
                         data = new Buffer(size);
-                        for (var i = 0, pos = 0, l = chunks.length; i < l; i++) {
-                            var chunk = chunks[i];
+                        for (let i = 0, pos = 0, l = chunks.length; i < l; i++) {
+                            let chunk = chunks[i];
                             chunk.copy(data, pos);
                             pos += chunk.length;
                         }
@@ -472,9 +569,9 @@ function  checkOnlineImage(pic) {
         });
     });
     }
-    var tOP = 0;
+    let tOP = 0;
    //随机检查线上3张图片，如果可优化体积大于0，则返回0
-    var picArray = shuffle(pic);
+    let picArray = shuffle(pic);
     Promise.all([getPic(picArray[0]), getPic(picArray[1]), getPic(picArray[2])]).then(function(results){
         results.forEach(function(size){
             tOP = tOP + size;
@@ -491,7 +588,7 @@ function  checkOnlineImage(pic) {
 }
 //图片检查错误详情
 function  imageResult(size,online) {
-    var temp = {};
+    let temp = {};
     temp['error_id'] = 3001;
     temp['name'] = '图片';
     if(size > 0){
@@ -507,20 +604,19 @@ function  imageResult(size,online) {
     return temp;
 }
 
-global.$ = null;
+global.$ = {};
 
 function readPage(arg) {
     return new Promise((resolve,reject) => {
             if(typeof arg.file.name != 'undefined' && typeof arg.file.name !== ''){
-                var c = typeof  arg.file.charset != 'undefined' ? arg.file.charset : 'utf-8'
-
+                let c = typeof  arg.file.charset != 'undefined' ? arg.file.charset : 'utf-8'
 
                 fs.readFile(arg.file.name,function (err, buffer) {
-                    var p =  iconv.decode(buffer,c);
+                    let p =  iconv.decode(buffer,c);
                     global.$ = cheerio.load(p,{useHtmlParser2:false});
                     resolve(p);
                 });
-                // var p =  iconv.decode(fs.readFileSync(arg.file.name),c);
+                // let p =  iconv.decode(fs.readFileSync(arg.file.name),c);
                 // console.log(arg.file.name)
                 // console.log(p.slice(100,200))
                 // global.$ = cheerio.load(p,{useHtmlParser2:false});
@@ -535,7 +631,7 @@ function readPage(arg) {
 }
 //排除测试页面及include页面
 function standardPage(page,checkResult) {
-    if($('head meta').length === 0 || $('body').text() == ''){
+    if($('meta').length === 0 || $('body').text() == ''){
         checkResult['pageStandard'] ='false';
     }else{
         checkResult['pageStandard'] ='true';
@@ -546,7 +642,7 @@ function standardPage(page,checkResult) {
 function check(arg,callback){
    localPicPath = path.resolve(arg.basePath+'ossweb-img/');
     //检查结果
-    var checkResult = {
+    let checkResult = {
         'list':[
             // {
             // "error_id": 1002,
@@ -567,16 +663,17 @@ function check(arg,callback){
             //标准页面检测
             standardPage(page,checkResult);
 
-            for(var i=0;i< initCheck.length;i++){
+            for(let i=0;i< initCheck.length;i++){
 
                 const data = initCheck[i];
                //配置为函数
                 if(typeof data.function !== undefined && typeof data.function !== '' &&  data.run){
-                    var temp = {};
+                    let temp = {};
                     temp = global[data.rule.function](page);
                     if(temp){
                         temp['error_id'] = data.error_id;
                         temp['name'] = data.name;
+                        temp['enname'] = data.enname;
                         checkResult.list.push(temp);
                     }
 
@@ -607,19 +704,24 @@ function check(arg,callback){
                             checkResult['url'] =requestInfo.log.pages[0].id;
                             checkResult['admin'] =requestInfo.log.nameList;
                             if(requestInfo.log.images.length < 3){
-                                var num = 3 - requestInfo.log.images;
-                                for(var i = 0;i<num;i++){
+                                let num = 3 - requestInfo.log.images;
+                                for(let i = 0;i<num;i++){
                                     requestInfo.log.images.push('http://ossweb-img.qq.com/images/game/brand/game-logo.png')
                                 }
                             }
                             //从真实请求中检测点击流
-                            for(var i =0;i<checkResult.list.length;i++){
-                                if(checkResult.list[i].error_id == 1001){
-                                    checkResult.list[i] = extend(checkResult.list[i], checkPing(requestInfo.log.ping,'request'))
+                            for(let i =0;i<checkResult.list.length;i++){
+                                let __li = checkResult.list[i];
+                                //从请求中检测点击流
+                                if(__li.error_id == 1001){
+                                    __li = extend(__li, checkPing(requestInfo.log.ping,'request'))
                                 }
                             }
+                            //检查页脚
+                            checkResult.list.push(checkFoot(requestInfo.log.js,page));
 
-                            var apiUrl = moduleConfig.isbnAPI.url + requestInfo.log.pages[0].isbnlink;
+
+                            let apiUrl = moduleConfig.isbnAPI.url + requestInfo.log.pages[0].isbnlink;
                             checkISBN(apiUrl,page).then((l)=>{
                                 if(l){
                                     checkResult.list.push(l)
@@ -630,7 +732,7 @@ function check(arg,callback){
                                 // if(!!arg.file.checkPic){
                                 // checkOnlineImage(requestInfo.log.images).then(size => {
                                 //      checkResult.list.push(imageResult(size,true));
-                                //      var apiUrl = 'http://x.x.x.x/isbn_api.php?url='+requestInfo.log.pages[0].id;
+                                //      let apiUrl = 'http://x.x.x.x/isbn_api.php?url='+requestInfo.log.pages[0].id;
                                 //     //检查isbn号
                                 //     checkISBN(apiUrl,page).then((l)=>{
                                 //         checkResult.list.push(l)
@@ -657,9 +759,9 @@ function check(arg,callback){
           checkResult['ignore'] = 'none';
           if(checkIgnore()[0] == 'all'){
                 //回调
-                checkResult.list = {};
+                checkResult.list = [];
           }else{
-               var d =checkIgnore().toString() ;
+               let d =checkIgnore().toString() ;
                 checkResult['ignore'] = d == '' ? 'none' : d;
           }
           callback({'checkResult':checkResult});
@@ -670,7 +772,7 @@ function check(arg,callback){
 //procheck
 function proCheck(arg,callback) {
     //检查结果
-    var checkResult = {
+    let checkResult = {
         'list':[
             // {
             // "error_id": 1002,
@@ -682,9 +784,11 @@ function proCheck(arg,callback) {
 
     const __d = arg.json;
     const __html  = __d.html;
-    const pageUrl = __d.url
+    const pageUrl = __d.url;
+    global.$ = null;
     global.$ = cheerio.load(__html,{useHtmlParser2:false});
     const __requests  = __d.requests;
+
     //用户自定义
     if(typeof arg.custom == 'object' ){
         if(arg.custom.file .length>0){
@@ -697,16 +801,17 @@ function proCheck(arg,callback) {
     //标准页面检测
     standardPage(__html,checkResult);
 
-    for(var i=0;i< initCheck.length;i++){
+    for(let i=0;i< initCheck.length;i++){
 
         const data = initCheck[i];
         //配置为函数
         if(typeof data.function !== undefined && typeof data.function !== '' &&  data.run){
-            var temp = {};
+            let temp = {};
             temp = global[data.rule.function](__html);
             if(temp){
                 temp['error_id'] = data.error_id;
                 temp['name'] = data.name;
+                temp['enname'] = data.enname;
                 checkResult.list.push(temp);
             }
 
@@ -715,32 +820,54 @@ function proCheck(arg,callback) {
     checkResult['url'] = pageUrl;
     //从HTML文件检测点击流
     checkPing(__html,'html')
-    //从真实请求中检测点击流
-    var tr = [];
+
+    //构建请求数组
+    let tr = [];
     for(let r in __d.requests){
         tr.push(r);
-    }
-    for(var i =0;i<checkResult.list.length;i++){
-        if(checkResult.list[i].error_id == 1001){
-            checkResult.list[i] = extend(checkResult.list[i], checkPing(tr,'request'))
+    };
+
+    for(let i =0;i<checkResult.list.length;i++){
+        let __li = checkResult.list[i];
+        //从请求中检测点击流
+        if(__li.error_id == 1001){
+            __li = extend(__li, checkPing(tr,'request'))
         }
+        //点击流正常则检查PTT
+        if(__li.error_id == 1001 && __li.error_info == ''){
+            let __cpc = checkPTTconfig(pageUrl,tr);
+
+            if(__cpc){
+                checkResult.list.push(__cpc)
+            }
+        }
+
     }
+    //检测页脚
+    checkResult.list.push(checkFoot(tr,__html))
+    //检查PTT配置
+
+
     //处理例外
-    var d =checkIgnore().toString() ;
-    checkResult['ignore'] = d == '' ? 'none' : d;
 
-
-
+    let d =checkIgnore().toString() ;
+    if(d !==''){
+        checkResult['ignore'] = d;
+        if(checkIgnore().indexOf('all') >= 0) {
+            checkResult.list = [];
+        }
+    }else{
+        checkResult['ignore'] = 'none'
+    }
     if(!callback){
         return new Promise((resolve,reject) => {
             //检查版号
             if(arg.config){
             moduleConfig = arg.config;
-            var apiUrl = arg.config.isbnAPI.url + pageUrl;
+            let apiUrl = arg.config.isbnAPI.url + pageUrl;
             checkISBN(apiUrl,__html).then((l)=>{
-                if(l){
+                if(l && checkIgnore().indexOf('all') < 0 ){
                     checkResult.list.push(l);
-
                 }
                 resolve({'checkResult':checkResult})
                 });
