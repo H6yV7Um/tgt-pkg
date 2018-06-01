@@ -192,7 +192,7 @@ global.checkTitle = function (page) {
         if (title.length > 0) {
             if (checkRe.test(titleText)) {
                 if(titleText.length > 80){
-                    rt['error_info'] = '页面标题字符大于'+intTitleLength+'个，请减少标题长度，目前标题内容：'+titleText;
+                    rt['error_info'] = '页面标题字符大于80个字，请减少标题长度，目前标题内容：'+titleText;
                 }else{
                     rt['pass_info'] = '';
                 }
