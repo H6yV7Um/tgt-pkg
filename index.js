@@ -443,14 +443,17 @@ global.checkISBN = function(url,page) {
         if(pointISBN < 0){resolve(0)};
     request(url,function (err,response,body) {
         if(err) reject(err);
+        let getApi = {};
         try{
-            let getApi = JSON.parse(body)[0];
+           getApi = JSON.parse(body)[0];
         }catch(err){
             console.error(body)
             console.error(err)
         }
+        console.log(getApi)
 
         if(typeof  getApi != 'undefined' ){
+
             let ISBN = pointISBN <= 0 ? '' :fomatString(page.substring(pointISBN,pointISBN+22));
             let m = page.match(/新广出审(\S*)号/);
             let Approvalno = !m ? '': fomatString(page.match(/新广出审(\S*)号/)[0]);
@@ -459,6 +462,7 @@ global.checkISBN = function(url,page) {
                 if(ISBN == fomatString(getApi.isbnno)){
                     rt['pass_info'] = "";
                 }else{
+
                     rt['error_info'] = "互联网游戏出版物ISBN号不正确"
                 }
             }
@@ -466,7 +470,8 @@ global.checkISBN = function(url,page) {
                 if(Approvalno == fomatString(getApi.approvalno)){
                     rt['pass_info'] = "";
                 }else{
-                    rt['error_info'] = "新广出审批号出错"
+                    if(rt['error_info'] != ''){rt['error_info'] += ','}
+                    rt['error_info'] += "新广出审批号出错"
                 }
             }
             resolve(rt);
