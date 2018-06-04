@@ -441,7 +441,7 @@ global.checkISBN = function(url,page) {
     rt['error_id'] = 1002;
     rt['name'] = '版号';
     rt['pass_info'] = '';
-
+    rt['error_info'] = '';
     return new Promise((resolve,reject) => {
         if(__checkIgnore.indexOf('isbn') >= 0) resolve(0);
         let pointISBN = page.indexOf('ISBN');
