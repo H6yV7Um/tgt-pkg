@@ -433,18 +433,24 @@ function checkPTTconfig(url,data) {
 //检测ISBN
 global.checkISBN = function(url,page) {
     let rt = {'enname':'isbn'};
-    let host = moduleConfig.isbnAPI.host
     rt['error_id'] = 1002;
     rt['name'] = '版号';
     rt['pass_info'] = '';
 
     return new Promise((resolve,reject) => {
         if(__checkIgnore.indexOf('isbn') >= 0) resolve(0);
+        let pointISBN = page.indexOf('ISBN');
+        if(pointISBN < 0){resolve(0)};
     request(url,function (err,response,body) {
         if(err) reject(err);
-        let getApi = JSON.parse(body)[0];
+        try{
+            let getApi = JSON.parse(body)[0];
+        }catch(err){
+            console.error(body)
+            console.error(err)
+        }
+
         if(typeof  getApi != 'undefined' ){
-            let pointISBN = page.indexOf('ISBN');
             let ISBN = pointISBN <= 0 ? '' :fomatString(page.substring(pointISBN,pointISBN+22));
             let m = page.match(/新广出审(\S*)号/);
             let Approvalno = !m ? '': fomatString(page.match(/新广出审(\S*)号/)[0]);
