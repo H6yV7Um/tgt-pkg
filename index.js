@@ -31,6 +31,10 @@ function shuffle(arr){
     }
     return arr;
 }
+//去重
+function unique(arr) {
+    return Array.from(new Set(arr))
+}
 //检查文件是否存在
 function checkFileExists(filepath){
     return new Promise((resolve, reject) => {
@@ -260,7 +264,8 @@ global.checkIgnore  = function (url) {
     function spcUrl() {
         let r = /\/ingame\/|\/d\/|\/zlkdatasys\/mct\//gim;
         if(r.test(url)){
-            rt.push('title','keywords','description','isbn','foot')
+            rt.push('title','keywords','description','isbn','foot');
+            rt = unique(rt)
         }
     }
     if(typeof url !== 'undefined' ){
@@ -337,7 +342,7 @@ global.checkPing = function(con,source) {
 // let __hasCheckENV = false;
 global.checkFoot = function (req,content) {
 
-    if(__checkIgnore.indexOf('foot') >= 0) return;
+    if(__checkIgnore.indexOf('foot') >= 0) return ;
     const regex = /\/\/(game.gtimg.cn|ossweb-img.qq.com)\/images\/js(\/2018foot\/|\/)foot\.js/ig;
     const docUrl = 'http://tgideas.qq.com/webplat/info/news_version3/804/25810/25811/25812/25814/m16274/201803/700317.shtml';
     let rt = {'error_id':1003,'pass_info':'','enname':'foot'};
@@ -450,7 +455,6 @@ global.checkISBN = function(url,page) {
             console.error(body)
             console.error(err)
         }
-        console.log(getApi)
 
         if(typeof  getApi != 'undefined' ){
 
@@ -868,13 +872,15 @@ function proCheck(arg,callback) {
         }
 
     }
-    //检测页脚
-    checkResult.list.push(checkFoot(tr,__html))
-    //检查PTT配置
-
 
     //处理例外
     var __ci = __checkIgnore;
+
+    //检测页脚
+    if(__ci.indexOf('foot') < 0 ) {
+        checkResult.list.push(checkFoot(tr, __html))
+    }
+
     let d =__ci.toString();
     if(d !==''){
         checkResult['ignore'] = d;
