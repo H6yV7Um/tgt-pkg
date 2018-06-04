@@ -62,6 +62,7 @@ function filterStr(str) {
     }
     return specialStr;
 }
+
 //检查项配置
 const initCheck = [
     {
@@ -181,7 +182,7 @@ global.userCustom = function (page,type,config,checkResult,v) {
 };
 //检测标题
 global.checkTitle = function (page) {
-    if(checkIgnore().indexOf('title') >= 0) return 0;
+    if(__checkIgnore.indexOf('title') >= 0) return 0;
     let title = $('title');
     let titleText = $('title').text();
     let rt = {};
@@ -210,7 +211,7 @@ global.checkTitle = function (page) {
 
 //检测关键词
 global.checkKeywords  = function (page) {
-    if(checkIgnore().indexOf('keywords') >= 0) return 0;
+    if(__checkIgnore.indexOf('keywords') >= 0) return 0;
     let metaKeywords = $("meta[name$='eywords']");
     let con = metaKeywords.attr("content");
     let rt = {};
@@ -225,7 +226,7 @@ global.checkKeywords  = function (page) {
 };
 //检测描述
 global.checkDescription  = function (page) {
-    if(checkIgnore().indexOf('description') >= 0) return 0;
+    if(__checkIgnore.indexOf('description') >= 0) return 0;
     let metaDescription = $("meta[name$='escription']");
     let con = metaDescription.attr("content");
     let rt = {};
@@ -246,19 +247,31 @@ global.checkDescription  = function (page) {
     return rt;
 }
 //检测排除项
-global.checkIgnore  = function () {
+global.checkIgnore  = function (url) {
     let metaIgnore = $("meta[name$='ignore']");
     let con = metaIgnore.attr("content");
-    let rt = '';
+    let rt = [];
+
     if (metaIgnore.length > 0 && con.length >0) {
         //checkResult.push({'ignore':'all'})
         rt = con.split(',');
     };
+    //根据URL屏蔽检测规则,默认除了 点击流都屏蔽
+    function spcUrl() {
+        let r = /\/ingame\/|\/d\/|\/zlkdatasys\/mct\//gim;
+        if(r.test(url)){
+            rt.push('title','keywords','description','isbn','foot')
+        }
+    }
+    if(typeof url !== 'undefined' ){
+        spcUrl();
+    }
     return rt;
 };
+let __checkIgnore  =  [];
 //检测编码
 global.checkCharset  = function (page) {
-    if(checkIgnore().indexOf('charset') >= 0) return 0;
+    if(__checkIgnore.indexOf('charset') >= 0) return 0;
     let metaCharset = /<meta[^>]*?charset=(["'/>]?)([^"'\s/>]+)\1[^>]*?>/gim;
     let charset = null;
     let rt = {};
@@ -274,7 +287,7 @@ global.checkCharset  = function (page) {
 let __htmlPing = false;
 let __requestPing = false;
 global.checkPing = function(con,source) {
-    if(checkIgnore().indexOf('ping') >= 0) return 0;
+    if(__checkIgnore.indexOf('ping') >= 0) return 0;
     let rt = {};
     let flag = false;
     let reg = /pingfore.qq.com.*[^hot]&url=/ig;
@@ -324,7 +337,7 @@ global.checkPing = function(con,source) {
 // let __hasCheckENV = false;
 global.checkFoot = function (req,content) {
 
-    if(checkIgnore().indexOf('foot') >= 0) return;
+    if(__checkIgnore.indexOf('foot') >= 0) return;
     const regex = /\/\/(game.gtimg.cn|ossweb-img.qq.com)\/images\/js(\/2018foot\/|\/)foot\.js/ig;
     const docUrl = 'http://tgideas.qq.com/webplat/info/news_version3/804/25810/25811/25812/25814/m16274/201803/700317.shtml';
     let rt = {'error_id':1003,'pass_info':'','enname':'foot'};
@@ -371,7 +384,7 @@ global.checkFoot = function (req,content) {
 };
 //检测PTT上报请求是否配置错误，只在proCheck方法中生效
 function checkPTTconfig(url,data) {
-    if(checkIgnore().indexOf('ptt') >= 0) return;
+    if(__checkIgnore.indexOf('ptt') >= 0) return;
     let checkAct = /\/(cp|act)\/a/ig;
     let getActName = /\/(cp|act)\/a(\S*)\//;
 
@@ -426,7 +439,7 @@ global.checkISBN = function(url,page) {
     rt['pass_info'] = '';
 
     return new Promise((resolve,reject) => {
-        if(checkIgnore().indexOf('isbn') >= 0) resolve(0);
+        if(__checkIgnore.indexOf('isbn') >= 0) resolve(0);
     request(url,function (err,response,body) {
         if(err) reject(err);
         let getApi = JSON.parse(body)[0];
@@ -640,6 +653,7 @@ function standardPage(page,checkResult) {
 
 //check方法
 function check(arg,callback){
+
    localPicPath = path.resolve(arg.basePath+'ossweb-img/');
     //检查结果
     let checkResult = {
@@ -662,7 +676,7 @@ function check(arg,callback){
             }
             //标准页面检测
             standardPage(page,checkResult);
-
+            __checkIgnore = checkIgnore(arg.file.name);
             for(let i=0;i< initCheck.length;i++){
 
                 const data = initCheck[i];
@@ -788,7 +802,7 @@ function proCheck(arg,callback) {
     global.$ = null;
     global.$ = cheerio.load(__html,{useHtmlParser2:false});
     const __requests  = __d.requests;
-
+    __checkIgnore = checkIgnore(pageUrl);
     //用户自定义
     if(typeof arg.custom == 'object' ){
         if(arg.custom.file .length>0){
@@ -849,11 +863,11 @@ function proCheck(arg,callback) {
 
 
     //处理例外
-
-    let d =checkIgnore().toString() ;
+    var __ci = __checkIgnore;
+    let d =__ci.toString();
     if(d !==''){
         checkResult['ignore'] = d;
-        if(checkIgnore().indexOf('all') >= 0) {
+        if(__ci.indexOf('all') >= 0) {
             checkResult.list = [];
         }
     }else{
@@ -866,7 +880,7 @@ function proCheck(arg,callback) {
             moduleConfig = arg.config;
             let apiUrl = arg.config.isbnAPI.url + pageUrl;
             checkISBN(apiUrl,__html).then((l)=>{
-                if(l && checkIgnore().indexOf('all') < 0 ){
+                if(l && __ci.indexOf('all') < 0 ){
                     checkResult.list.push(l);
                 }
                 resolve({'checkResult':checkResult})
