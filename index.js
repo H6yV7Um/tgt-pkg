@@ -262,7 +262,7 @@ global.checkIgnore  = function (url) {
     };
     //根据URL屏蔽检测规则,默认除了 点击流都屏蔽
     function spcUrl() {
-        let r = /\/ingame\/|\/d\/|\/zlkdatasys\/mct\//gim;
+        let r = /\/ingame\/|\/ingame2015\/|lol\.qq\.com\/client\/lcu\/|\/d\/|\/zlkdatasys\/mct\//gim;
         if(r.test(url)){
             rt.push('title','keywords','description','isbn','foot');
             rt = unique(rt)
